@@ -1,117 +1,98 @@
-# Nutrition
+# Nutrition 🍎
 
-[![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1-brightgreen)](https://www.minecraft.net)
-[![NeoForge](https://img.shields.io/badge/NeoForge-21.1-blue)](https://neoforged.net)
-[![Modrinth](https://img.shields.io/badge/dynamic/json?label=Modrinth&query=version&url=https://api.modrinth.com/v2/project/nutrition-uitstalie)](https://modrinth.com/mod/nutrition-uitstalie)
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1-80ba42?logo=minecraft)](https://minecraft.net)
+[![NeoForge](https://img.shields.io/badge/NeoForge-21.1-f16436)](https://neoforged.net)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-A Minecraft mod that adds a comprehensive nutrition system — track 15 nutrient groups, trigger potion effects and attribute modifiers based on your diet.
+> Minecraft 营养系统模组 — 15 种营养素，13 条效果规则，你的饮食决定你的增益。
 
-## Features
+## 🎮 功能
 
-- **15 Nutrition Groups** — fruits, vegetables, grains, proteins, fish, eggs, dairy, mushrooms, nuts, sugars, honey, wine, coffee, salt, trace elements
-- **13 Effect Rules** — potion effects (regeneration, speed, haste, night vision, water breathing, luck, saturation) and attribute modifiers (health, armor, knockback resistance) triggered by meeting nutrition thresholds
-- **Combined Conditions** — OR/AND logic across multiple nutrition groups (e.g., armor bonus when fish + veg + grain + egg + protein all above 50%)
-- **Arc Progress Bars** — 260° arc rendering with 64-segment tessellation around item icons in the GUI
-- **BFS Auto-Propagation** — recipe chain analysis automatically assigns food items to nutrition groups at world load
-- **Configurable Decay** — per-group decay value, frequency, and logarithmic pressure scaling
-- **F3+H Tooltips** — nutrition group tags displayed on food items
-- **Data Pack Driven** — all configuration (groups, items, effects) via JSON data packs
+- **15 种营养组** — 水果、蔬菜、谷物、蛋白、鱼类、蛋、奶、菌类、坚果、糖、蜂蜜、酒、咖啡、盐、微量元素
+- **13 条效果规则** — 满足营养阈值后触发药水效果（生命恢复、速度、急迫、夜视、水下呼吸、幸运、饱和）和属性加成（生命、护甲、抗击退）
+- **组合条件** — 多营养组 AND/OR 逻辑（比如鱼类+蔬菜+谷物+蛋+蛋白全都 ≥50k 才加护甲）
+- **弧形进度条** — GUI 中 260° 弧形渲染，64 段细分，绕图标外侧
+- **BFS 自动推断** — 世界加载时沿配方链自动分配食物到营养组
+- **可配置衰减** — 每组独立衰减值/频率/对数压力曲线
+- **F3+H Tooltip** — 物品提示显示所属营养组标签
+- **数据包驱动** — 所有配置（组、物品、效果）均通过 JSON 数据包定义
 
-## Requirements
+## 📦 安装
 
-- Minecraft 1.21.1
-- NeoForge 21.1+
-- Java 21+
-- [UitstalieLibrary](https://github.com/uitstalie/UitstalieLibrary) (bundled via jar-in-jar)
+- Minecraft **1.21.1**
+- NeoForge **21.1+**
+- Java **21+**
 
-## Installation
+从 [Releases](https://github.com/uitstalie/Nutrition-public/releases) 下载 `.jar`，放入 `mods/` 文件夹。
 
-1. Download the `.jar` from [Releases](https://github.com/uitstalie/Nutrition/releases)
-2. Place it in your `mods/` folder
-3. Ensure UitstalieLibrary is also in `mods/` (or it will be auto-bundled)
+## ⌨️ 命令
 
-## Quick Start
+| 命令 | 说明 |
+|------|------|
+| `/nutrition set <组> <值>` | 设置营养值（0–100000） |
+| `/nutrition get <组>` | 查看当前营养值 |
+| `/nutrition list` | 列出所有营养组及数值 |
+| `/nutrition autogen` | 运行 BFS 自动生成 |
+| `/nutrition find-seeds` | 查找最小标记物品集合 |
 
-1. **Open the GUI** — press `N` key
-2. **Info tab** — see all 15 nutrition groups with arc progress bars showing current levels
-3. **Effects tab** — see active and inactive effects with their trigger conditions
-4. **Eat food** — nutrition values increase, decay starts after a configured delay
+## 📊 营养组
 
-## Commands
+| ID | 名称 | 图标 | 衰减 |
+|----|------|------|------|
+| `fruits` | 水果 | Apple | 每 6s |
+| `vegetables` | 蔬菜 | Carrot | 每 6s |
+| `grains` | 谷物 | Bread | 每 6s |
+| `proteins` | 蛋白 | Cooked Beef | 每 6s |
+| `fishs` | 鱼类 | Cooked Cod | 每 7s |
+| `eggs` | 蛋 | Egg | 每 7s |
+| `milks` | 奶 | Milk Bucket | 每 6s |
+| `mushrooms` | 菌类 | Red Mushroom | 每 7s |
+| `nuts` | 坚果 | Cocoa Beans | 每 7s |
+| `sugars` | 糖 | Sugar | 每 6s |
+| `honeys` | 蜂蜜 | Honey Bottle | 每 8s |
+| `wines` | 酒 | Sweet Berries | 每 8s |
+| `coffee` | 咖啡 | Cocoa Beans | 每 7s |
+| `salt` | 盐 | Firework Star | 每 8s |
+| `trace_elements` | 微量元素 | Iron Ingot | 每 8s |
 
-```
-/nutrition set <group> <value>     — Set nutrition value (0-100000)
-/nutrition get <group>             — Get current nutrition value
-/nutrition list                    — List all groups and their values
-/nutrition autogen                 — Run BFS auto-generation
-/nutrition find-seeds              — Find minimal item marking set
-```
+## ⚡ 效果规则
 
-## Nutrition Groups
+| # | 效果 | 条件 | 阈值 |
+|---|------|------|------|
+| 1 | +生命上限 1 | 水果 **或** 蔬菜 **或** 谷物 | ≥ 75k |
+| 2 | +生命上限 2 | 蛋白 **且** 蛋 **且** 奶 | ≥ 75k |
+| 3 | +护甲 2 | 鱼 **且** 蔬菜 **且** 谷物 **且** 蛋 **且** 蛋白 | ≥ 50k |
+| 4 | +护甲 2 & +抗击退 | 坚果 **且** 盐 **且** 菌类 | ≥ 60k |
+| 5 | 水下呼吸 | 鱼类 | ≥ 25k |
+| 6 | 夜视 | 蔬菜 | ≥ 50k |
+| 7 | 幸运 | 糖 **或** 蜂蜜 **或** 酒 | ≥ 20k |
+| 8 | 急迫 | 坚果 **或** 盐 **或** 咖啡 | ≥ 30k |
+| 9 | 速度 | 咖啡 | ≥ 40k |
+| 10 | 生命恢复 | 菌类 **或** 蛋 **或** 奶 | ≥ 50k |
+| 11 | 速度 II | 坚果 **且** 蜂蜜 **且** 糖 | ≥ 60k |
+| 12 | 饱和 | 谷物 **且** 蛋白 **且** 蔬菜 | ≥ 70k |
+| 13 | 幸运 II | 蜂蜜 **且** 酒 **且** 咖啡 | ≥ 60k |
 
-| ID | Group | Default Icon | Decay |
-|----|-------|-------------|-------|
-| `fruits` | Fruits | Apple | Every 6s |
-| `vegetables` | Vegetables | Carrot | Every 6s |
-| `grains` | Grains | Bread | Every 6s |
-| `proteins` | Proteins | Cooked Beef | Every 6s |
-| `fishs` | Fish | Cooked Cod | Every 7s |
-| `eggs` | Eggs | Egg | Every 7s |
-| `milks` | Dairy | Milk Bucket | Every 6s |
-| `mushrooms` | Mushrooms | Red Mushroom | Every 7s |
-| `nuts` | Nuts | Cocoa Beans | Every 7s |
-| `sugars` | Sugars | Sugar | Every 6s |
-| `honeys` | Honey | Honey Bottle | Every 8s |
-| `wines` | Wine | Sweet Berries | Every 8s |
-| `coffee` | Coffee | Cocoa Beans | Every 7s |
-| `salt` | Salt | Firework Star | Every 8s |
-| `trace_elements` | Trace Elements | Iron Ingot | Every 8s |
+## 🛠 数据包自定义
 
-## Effect Rules
-
-| # | Effect | Condition | Threshold |
-|---|--------|-----------|-----------|
-| 1 | +Health | fruits OR vegetables OR grains | ≥ 75k |
-| 2 | +Health | proteins AND eggs AND milks | ≥ 75k |
-| 3 | +Armor | fishs AND vegetables AND grains AND eggs AND proteins | ≥ 50k |
-| 4 | +Armor +KnockbackRes | nuts AND salts AND mushrooms | ≥ 60k |
-| 5 | Water Breathing | fishs | ≥ 25k |
-| 6 | Night Vision | vegetables | ≥ 50k |
-| 7 | Luck | sugars OR honeys OR wines | ≥ 20k |
-| 8 | Haste | nuts OR salts OR coffee | ≥ 30k |
-| 9 | Speed | coffee | ≥ 40k |
-| 10 | Regeneration | mushrooms OR eggs OR milks | ≥ 50k |
-| 11 | Speed II | nuts AND honeys AND sugars | ≥ 60k |
-| 12 | Saturation | grains AND proteins AND vegetables | ≥ 70k |
-| 13 | Luck II | honeys AND wines AND coffees | ≥ 60k |
-
-## Data Pack Customization
-
-Create custom data packs to add or modify:
+创建自定义数据包来添加或修改配置：
 
 ```
-data/nutrition/config/config.json    — Global settings (frequency, value formula)
-data/nutrition/groups/<group>.json   — Nutrition group definitions
-data/nutrition/items/<group>.json    — Item-to-group bindings with manual values
-data/nutrition/effects/default.json  — Effect rules with OR/AND conditions
+data/nutrition/config/config.json    — 全局设置（频率、营养值公式）
+data/nutrition/groups/<组>.json      — 营养组定义
+data/nutrition/items/<组>.json       — 物品-组绑定及手动值
+data/nutrition/effects/default.json  — 效果规则（AND/OR 条件）
 ```
 
-See [Wiki](https://github.com/uitstalie/Nutrition/wiki) for detailed configuration reference.
+详见 [Wiki](https://github.com/uitstalie/Nutrition-public/wiki) 配置参考。
 
-## Building
+## 🔨 构建
 
 ```bash
 cd source
-./gradlew build          # Compile
-./gradlew runClient      # Run client
-./gradlew runData        # Generate data packs
+./gradlew build
 ```
 
-## License
+## 📄 许可
 
-All Rights Reserved © uitstalie
-
-## Credits
-
-- Inspired by [Diet](https://github.com/TheIllusiveC4/Diet) and [AppleSkin](https://github.com/squeek502/AppleSkin)
-- Commissioned by [uitstalie](https://github.com/uitstalie)
+MIT License — 详见 [LICENSE](LICENSE)
