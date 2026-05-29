@@ -1,0 +1,20 @@
+{
+  "groups": "milks",
+  "items": [
+    {
+      "item": "minecraft:milk_bucket"
+    },
+    {
+      "item": "yeastnfeast:cheese_slice"
+    },
+    {
+      "item": "yeastnfeast:duskwheel_slice"
+    },
+    {
+      "item": "yeastnfeast:freshwheel_slice"
+    },
+    {
+      "item": "yeastnfeast:sharpwheel_slice"
+    }
+  ]
+}

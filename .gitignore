@@ -1,0 +1,25 @@
+# 设计文档
+doc/
+
+# OpenCode 项目配置
+.opencode/
+opencode.json
+AGENTS.md
+
+# 设计资源
+res/
+
+# 构建输出
+build/
+run/
+logs/
+.gradle/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,11 @@
+{
+  "groups": "eggs",
+  "items": [
+    {
+      "item": "minecraft:egg"
+    },
+    {
+      "item": "farmersdelight:fried_egg"
+    }
+  ]
+}
