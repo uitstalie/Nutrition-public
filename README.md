@@ -6,6 +6,8 @@
 
 > Minecraft 营养系统模组 — 15 种营养素，13 条效果规则，你的饮食决定你的增益。
 
+> 最初灵感源自 [Diet](https://modrinth.com/mod/diet)，可视为其（另一款）精神续作。
+
 > **⚠️ AI 生成声明**：本项目由 [OpenCode](https://opencode.ai) 工具辅助生成，主力模型为 **DeepSeek**，GPT-5.4/5.5 辅助。如你对 AI 工具方案、代码质量或安全风险有顾虑，请谨慎使用本模组。
 
 ## 🎮 功能
