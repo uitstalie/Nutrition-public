@@ -3,9 +3,7 @@ package com.uitstalie.nutrition.nutrition.api.data.item;
 import com.uitstalie.nutrition.nutrition.Nutrition;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackType;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.common.data.JsonCodecProvider;
 
 import java.util.List;
@@ -17,8 +15,8 @@ import java.util.concurrent.CompletableFuture;
  */
 public class NutritionItemProvider extends JsonCodecProvider<NutritionItemJson> {
 
-    public NutritionItemProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, ExistingFileHelper existingFileHelper) {
-        super(output, PackOutput.Target.DATA_PACK, "items", PackType.SERVER_DATA, NutritionItemJson.CODEC, lookupProvider, Nutrition.MOD_ID, existingFileHelper);
+    public NutritionItemProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
+        super(output, PackOutput.Target.DATA_PACK, "items", NutritionItemJson.CODEC, lookupProvider, Nutrition.MOD_ID);
     }
 
     @Override
@@ -280,7 +278,7 @@ public class NutritionItemProvider extends JsonCodecProvider<NutritionItemJson> 
 
     private void add(String group, List<NutritionItemJson.ItemEntry> items) {
         this.unconditional(
-                ResourceLocation.fromNamespaceAndPath(Nutrition.MOD_ID, group),
+                Identifier.fromNamespaceAndPath(Nutrition.MOD_ID, group),
                 new NutritionItemJson(group, items)
         );
     }

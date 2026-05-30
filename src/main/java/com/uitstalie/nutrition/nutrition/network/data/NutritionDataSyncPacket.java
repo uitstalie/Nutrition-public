@@ -7,10 +7,8 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
@@ -33,7 +31,7 @@ public record NutritionDataSyncPacket(Map<String, Integer> nutritionValues,
                                       List<ItemEntry> itemEntries) implements CustomPacketPayload {
 
     public static final Type<NutritionDataSyncPacket> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(Nutrition.MOD_ID, "nutrition_data_sync"));
+            Identifier.fromNamespaceAndPath(Nutrition.MOD_ID, "nutrition_data_sync"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, NutritionDataSyncPacket> CODEC =
             CustomPacketPayload.codec(NutritionDataSyncPacket::encode, NutritionDataSyncPacket::decode);
@@ -99,7 +97,7 @@ public record NutritionDataSyncPacket(Map<String, Integer> nutritionValues,
         int efSize = buf.readVarInt();
         List<EffectEntry> ef = new ArrayList<>(efSize);
         for (int i = 0; i < efSize; i++) {
-            ResourceLocation id = ResourceLocation.parse(buf.readUtf());
+            Identifier id = Identifier.parse(buf.readUtf());
             int amp = buf.readVarInt();
             ef.add(new EffectEntry(id, amp));
         }
@@ -117,7 +115,7 @@ public record NutritionDataSyncPacket(Map<String, Integer> nutritionValues,
         int atSize = buf.readVarInt();
         List<AttributeEntry> at = new ArrayList<>(atSize);
         for (int i = 0; i < atSize; i++) {
-            ResourceLocation attrId = ResourceLocation.parse(buf.readUtf());
+            Identifier attrId = Identifier.parse(buf.readUtf());
             double amount = buf.readDouble();
             String operation = buf.readUtf();
             at.add(new AttributeEntry(attrId, amount, operation));
@@ -141,12 +139,10 @@ public record NutritionDataSyncPacket(Map<String, Integer> nutritionValues,
     // ── handle ──
 
     public static void handle(NutritionDataSyncPacket message, IPayloadContext context) {
-        if (context.flow().isClientbound()) {
-            context.enqueueWork(() -> handleClient(message));
-        }
+        context.enqueueWork(() -> handleClient(message));
     }
 
-    @OnlyIn(Dist.CLIENT)
+
     private static void handleClient(NutritionDataSyncPacket packet) {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) return;
@@ -162,7 +158,7 @@ public record NutritionDataSyncPacket(Map<String, Integer> nutritionValues,
                 .toList();
         List<ClientNutritionState.SyncedItemEntry> si = packet.itemEntries.stream()
                 .map(e -> new ClientNutritionState.SyncedItemEntry(
-                        ResourceLocation.parse(e.itemId),
+                        Identifier.parse(e.itemId),
                         e.nutritions.stream()
                                 .map(n -> new ClientNutritionState.SyncedItemNutrition(n.groupName, n.perValue))
                                 .toList()))
@@ -194,7 +190,7 @@ public record NutritionDataSyncPacket(Map<String, Integer> nutritionValues,
     /**
      * 同步负载中单条 effect 信息。
      */
-    public record EffectEntry(ResourceLocation effectId, int amplifier) {
+    public record EffectEntry(Identifier effectId, int amplifier) {
     }
 
     /**
@@ -206,7 +202,7 @@ public record NutritionDataSyncPacket(Map<String, Integer> nutritionValues,
     /**
      * 同步负载中单条 attribute 信息（attributeId / amount / operation）。
      */
-    public record AttributeEntry(ResourceLocation attributeId, double amount, String operation) {
+    public record AttributeEntry(Identifier attributeId, double amount, String operation) {
     }
 
     /**

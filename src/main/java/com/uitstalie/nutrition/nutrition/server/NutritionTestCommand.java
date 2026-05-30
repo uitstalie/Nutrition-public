@@ -14,8 +14,8 @@ import com.uitstalie.nutrition.nutrition.util.log.Log;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 
 import java.util.*;
 
@@ -33,7 +33,7 @@ public final class NutritionTestCommand {
         dispatcher.register(
                 Commands.literal("nutrition")
                         .then(Commands.literal("test")
-                                .requires(src -> src.hasPermission(2))
+                                .requires(src -> src.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
                                 .executes(ctx -> runAllTests(ctx.getSource()))));
     }
 
@@ -131,6 +131,8 @@ public final class NutritionTestCommand {
     // ── 测试 5: 公式求值 ───────────────────────────────────────────────
 
     private static TestResult testFormulaEvaluator() {
+        // 默认公式: healing*100 + saturation*50
+        // 测试: healing=4, saturation=2.4 → 400 + 120 = 520
         double result = com.uitstalie.nutrition.nutrition.util.data.ValueFormulaEvaluator.evaluate(
                 "healing*100 + saturation*50", 4, 2.4f);
         if (Math.abs(result - 520.0) > 0.01) {
@@ -142,10 +144,15 @@ public final class NutritionTestCommand {
     // ── 测试 6: 区间规则 ───────────────────────────────────────────────
 
     private static TestResult testValueRange() {
-        ValueRange range = new ValueRange(10, 50);
+        com.uitstalie.nutrition.nutrition.util.data.ValueRange range =
+                new com.uitstalie.nutrition.nutrition.util.data.ValueRange(10, 50);
+        // below 10 → false
         if (range.contains(5)) return TestResult.fail("range", "5 should NOT match [10,50]");
+        // in range → true
         if (!range.contains(30)) return TestResult.fail("range", "30 should match [10,50]");
+        // above 50 → false
         if (range.contains(60)) return TestResult.fail("range", "60 should NOT match [10,50]");
+        // boundary → true
         if (!range.contains(10)) return TestResult.fail("range", "10 should match [10,50]");
         return TestResult.pass("range [10,50] matching");
     }
@@ -163,13 +170,16 @@ public final class NutritionTestCommand {
             NutritionDataStorage data = cap.getNutritionData();
             if (data == null) return TestResult.fail("nutrition-api", "NutritionDataStorage is null");
 
+            // set a value
             data.setNutrition("fruit", 50000);
             int val = data.getNutrition("fruit");
             if (val != 50000) return TestResult.fail("nutrition-api", "set/get mismatch: " + val);
 
+            // get unknown group
             int unknown = data.getNutrition("nonexistent_group");
             if (unknown != 0) return TestResult.fail("nutrition-api", "Unknown group should be 0, got " + unknown);
 
+            // reset
             data.setNutrition("fruit", 0);
             return TestResult.pass("nutrition-api (set/get/unknown)");
         } catch (Exception e) {
@@ -181,13 +191,14 @@ public final class NutritionTestCommand {
 
     private static TestResult testAutogenOnServer(CommandSourceStack source) {
         try {
-            MinecraftServer server = source.getServer();
+            var server = source.getServer();
             if (server == null) return TestResult.fail("autogen", "No server available");
 
             var config = NutritionDataRegistry.config();
             if (config == null || !config.autoGenerateOnLoad)
                 return TestResult.pass("autogen (disabled in config — skip)");
 
+            // 手动触发 autogen
             long start = System.currentTimeMillis();
             NutritionAutoGenerateService.generate(server);
             long elapsed = System.currentTimeMillis() - start;
@@ -203,10 +214,12 @@ public final class NutritionTestCommand {
 
     private static TestResult testEffectEvaluation() {
         try {
+            // Build a mock NutritionDataStorage
             NutritionDataStorage mockData = new NutritionDataStorage();
             mockData.setNutrition("fruit", 60);
             mockData.setNutrition("protein", 30);
 
+            // AND match: fruit >= 50 AND protein >= 20 → should be true
             var andMatch = new NutritionEffectJson.Match(
                     NutritionEffectJson.Predict.AND,
                     List.of(
@@ -219,6 +232,7 @@ public final class NutritionTestCommand {
             if (!andMatch.evaluate(mockData))
                 return TestResult.fail("effect-and", "AND match should be true for fruit>=50, protein>=20");
 
+            // OR match: fruit >= 90 OR protein >= 20 → should be true (protein meets)
             var orMatch = new NutritionEffectJson.Match(
                     NutritionEffectJson.Predict.OR,
                     List.of(
@@ -231,6 +245,7 @@ public final class NutritionTestCommand {
             if (!orMatch.evaluate(mockData))
                 return TestResult.fail("effect-or", "OR match should be true (protein>=20)");
 
+            // NOT match: NOT fruit >= 90 → should be true (fruit=60 is NOT >=90)
             var notMatch = new NutritionEffectJson.Match(
                     NutritionEffectJson.Predict.NOT,
                     List.of(
@@ -247,13 +262,14 @@ public final class NutritionTestCommand {
         }
     }
 
-    // ── 测试 10: 衰减机制 ──────────────────────────────────────────────
+    // ── 测试 10: 衰减机制 ───────────────────────────────────────────────
 
     private static TestResult testDecayMechanics() {
         try {
             List<NutritionGroupJson> groups = NutritionDataRegistry.groups();
             if (groups == null || groups.isEmpty()) return TestResult.fail("decay", "No groups");
 
+            // 验证每个组的衰减参数合法
             for (NutritionGroupJson g : groups) {
                 if (g.decayValue < 0)
                     return TestResult.fail("decay", "Group '" + g.groupName + "' has negative decayValue: " + g.decayValue);
@@ -263,6 +279,9 @@ public final class NutritionTestCommand {
                     return TestResult.fail("decay", "Group '" + g.groupName + "' has negative decayPressure: " + g.decayPressure);
             }
 
+            // 验证衰减公式: decay = decayValue * (1 + (value/100000)^decayPressure)
+            // value=0 → decay = decayValue
+            // value=100000 → decay = decayValue * 2^decayPressure
             double value0 = 0;
             double pressure = 2.0;
             double decayAt0 = 1.0 * (1 + Math.pow(value0 / 100000.0, pressure));

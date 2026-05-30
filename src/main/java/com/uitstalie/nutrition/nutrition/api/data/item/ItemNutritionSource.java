@@ -1,6 +1,6 @@
 package com.uitstalie.nutrition.nutrition.api.data.item;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ import java.util.List;
  */
 public interface ItemNutritionSource {
 
-    NutritionItemJson getItemConfig(ResourceLocation itemId);
+    NutritionItemJson getItemConfig(Identifier itemId);
 
     List<NutritionItemJson> getItems();
 }

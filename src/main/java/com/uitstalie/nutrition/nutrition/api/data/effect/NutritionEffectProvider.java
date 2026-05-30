@@ -4,9 +4,7 @@ import com.uitstalie.nutrition.nutrition.Nutrition;
 import com.uitstalie.nutrition.nutrition.util.data.ValueRange;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackType;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.common.data.JsonCodecProvider;
 
 import java.util.List;
@@ -18,8 +16,8 @@ import java.util.concurrent.CompletableFuture;
  */
 public class NutritionEffectProvider extends JsonCodecProvider<NutritionEffectJson> {
 
-    public NutritionEffectProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, ExistingFileHelper existingFileHelper) {
-        super(output, PackOutput.Target.DATA_PACK, "effects", PackType.SERVER_DATA, NutritionEffectJson.CODEC, lookupProvider, Nutrition.MOD_ID, existingFileHelper);
+    public NutritionEffectProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
+        super(output, PackOutput.Target.DATA_PACK, "effects", NutritionEffectJson.CODEC, lookupProvider, Nutrition.MOD_ID);
     }
 
     @Override
@@ -89,7 +87,7 @@ public class NutritionEffectProvider extends JsonCodecProvider<NutritionEffectJs
         ));
 
         this.unconditional(
-                ResourceLocation.fromNamespaceAndPath(Nutrition.MOD_ID, "default"),
+                Identifier.fromNamespaceAndPath(Nutrition.MOD_ID, "default"),
                 def
         );
     }

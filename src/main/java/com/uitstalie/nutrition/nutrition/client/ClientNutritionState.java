@@ -1,6 +1,6 @@
 package com.uitstalie.nutrition.nutrition.client;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -22,7 +22,7 @@ public final class ClientNutritionState {
     private static List<SyncedEffect> effects = List.of();
     private static List<SyncedGroup> groups = List.of();
     private static List<SyncedAttribute> attributes = List.of();
-    private static final Map<ResourceLocation, List<SyncedItemNutrition>> itemNutritions = new LinkedHashMap<>();
+    private static final Map<Identifier, List<SyncedItemNutrition>> itemNutritions = new LinkedHashMap<>();
 
     private ClientNutritionState() {
     }
@@ -69,7 +69,7 @@ public final class ClientNutritionState {
     }
 
     /** 查询物品的营养绑定，未配置返回空列表。 */
-    public static List<SyncedItemNutrition> getItemNutritions(ResourceLocation itemId) {
+    public static List<SyncedItemNutrition> getItemNutritions(Identifier itemId) {
         return itemNutritions.getOrDefault(itemId, List.of());
     }
 
@@ -86,7 +86,7 @@ public final class ClientNutritionState {
     /**
      * 一条已同步的 effect 信息。
      */
-    public record SyncedEffect(ResourceLocation effectId, int amplifier) {
+    public record SyncedEffect(Identifier effectId, int amplifier) {
     }
 
     /**
@@ -98,13 +98,13 @@ public final class ClientNutritionState {
     /**
      * 一条已同步的 attribute 信息。
      */
-    public record SyncedAttribute(ResourceLocation attributeId, double amount, String operation) {
+    public record SyncedAttribute(Identifier attributeId, double amount, String operation) {
     }
 
     /**
      * 一条已同步的物品营养绑定（物品 ID + 营养组列表）。
      */
-    public record SyncedItemEntry(ResourceLocation itemId, List<SyncedItemNutrition> nutritions) {
+    public record SyncedItemEntry(Identifier itemId, List<SyncedItemNutrition> nutritions) {
     }
 
     /**

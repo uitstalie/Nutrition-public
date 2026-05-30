@@ -63,13 +63,13 @@ public class FoodRecord {
     public static @Nullable FoodRecord deserialize(CompoundTag tag, boolean validate){
         FoodRecord foodRecord = new FoodRecord();
         if(tag.contains("food_item_id")){
-            foodRecord.foodItemId = tag.getString("food_item_id");
+            foodRecord.foodItemId = tag.getStringOr("food_item_id", "");
         }
         if(tag.contains("update_tick")){
-            foodRecord.updateTick = tag.getLong("update_tick");
+            foodRecord.updateTick = tag.getLongOr("update_tick", 0);
         }
         if(tag.contains("index")){
-            foodRecord.index = tag.getString("index");
+            foodRecord.index = tag.getStringOr("index", "");
         }
 
         try{

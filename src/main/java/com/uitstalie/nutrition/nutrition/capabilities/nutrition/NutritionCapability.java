@@ -6,11 +6,8 @@ import com.uitstalie.nutrition.nutrition.util.effect.ActiveAttributeState;
 import com.uitstalie.nutrition.nutrition.util.effect.ActiveEffectState;
 import com.uitstalie.nutrition.nutrition.util.effect.NutritionEffectApplier;
 import com.uitstalie.nutrition.nutrition.util.ticker.TimerState;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.util.INBTSerializable;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +23,7 @@ import java.util.List;
  * <h3>Phase 4</h3>
  * 新增 {@link #effectRefreshCountdown} 用于驱动 effect/attribute 周期刷新。
  */
-public class NutritionCapability implements INBTSerializable<CompoundTag> {
+public class NutritionCapability {
     private final TimerState timerState;
     private final NutritionDataStorage nutritionData;
     private final FoodRecordWindow foodRecord;
@@ -110,10 +107,9 @@ public class NutritionCapability implements INBTSerializable<CompoundTag> {
         this.capturedFood = ItemStack.EMPTY;
     }
 
-    // ────────── NBT ──────────
+    // ────────── Persistence ──────────
 
-    @Override
-    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+    public CompoundTag save() {
         CompoundTag tag = new CompoundTag();
         tag.put("timer", timerState.serializeNBT());
         tag.put("nutrition", nutritionData.serializeNBT());
@@ -122,19 +118,18 @@ public class NutritionCapability implements INBTSerializable<CompoundTag> {
         return tag;
     }
 
-    @Override
-    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag compoundTag) {
+    public void load(CompoundTag compoundTag) {
         if (compoundTag.contains("timer")) {
-            timerState.deserializeNBT(compoundTag.getCompound("timer"));
+            timerState.deserializeNBT(compoundTag.getCompoundOrEmpty("timer"));
         }
         if (compoundTag.contains("nutrition")) {
-            nutritionData.deserializeNBT(compoundTag.getCompound("nutrition"));
+            nutritionData.deserializeNBT(compoundTag.getCompoundOrEmpty("nutrition"));
         }
         if (compoundTag.contains("foodRecord")) {
-            foodRecord.deserializeNBT(compoundTag.getCompound("foodRecord"));
+            foodRecord.deserializeNBT(compoundTag.getCompoundOrEmpty("foodRecord"));
         }
         if (compoundTag.contains("effectRefresh")) {
-            effectRefreshCountdown = compoundTag.getInt("effectRefresh");
+            effectRefreshCountdown = compoundTag.getIntOr("effectRefresh", 0);
         }
     }
 }

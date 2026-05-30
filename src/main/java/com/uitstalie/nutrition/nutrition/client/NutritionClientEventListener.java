@@ -9,7 +9,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import java.util.List;
@@ -31,9 +31,8 @@ public class NutritionClientEventListener {
     /** N 键：打开/关闭营养 GUI */
     public static final KeyMapping OPEN_GUI_KEY = new KeyMapping(
             "key.nutrition.gui",
-            InputConstants.Type.KEYSYM,
             InputConstants.KEY_N,
-            "key.categories.nutrition"
+            KeyMapping.Category.MISC
     );
 
     @SubscribeEvent
@@ -72,7 +71,7 @@ public class NutritionClientEventListener {
         ItemStack stack = event.getItemStack();
         if (stack.isEmpty()) return;
 
-        ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        Identifier itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
         if (itemId == null) return;
 
         List<SyncedItemNutrition> nutritions = ClientNutritionState.getItemNutritions(itemId);

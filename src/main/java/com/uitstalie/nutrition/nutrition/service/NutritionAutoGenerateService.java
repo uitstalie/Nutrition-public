@@ -5,15 +5,18 @@ import com.uitstalie.nutrition.nutrition.api.data.group.NutritionGroupJson;
 import com.uitstalie.nutrition.nutrition.api.data.item.NutritionItemJson;
 import com.uitstalie.nutrition.nutrition.util.log.Log;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -64,7 +67,7 @@ public final class NutritionAutoGenerateService {
             Log.w("AutoGen", "Known groups collected for " + knownGroups.size() + " items");
 
             // Step 2: 建立 ingredient → recipes 反向索引
-            Map<ResourceLocation, List<Recipe<?>>> recipesByIngredient = buildIngredientIndex(server);
+            Map<Identifier, List<Recipe<?>>> recipesByIngredient = buildIngredientIndex(server);
             Log.w("AutoGen", "Ingredient index: " + recipesByIngredient.size() + " ingredient keys");
 
             // Step 3: BFS 扩散
@@ -79,7 +82,7 @@ public final class NutritionAutoGenerateService {
                 int levelSize = queue.size();
                 for (int i = 0; i < levelSize; i++) {
                     String currentItemStr = queue.poll();
-                    ResourceLocation currentItem = ResourceLocation.tryParse(currentItemStr);
+                    Identifier currentItem = Identifier.tryParse(currentItemStr);
                     if (currentItem == null) continue;
 
                     Set<String> currentGroups = knownGroups.get(currentItemStr);
@@ -88,7 +91,7 @@ public final class NutritionAutoGenerateService {
                     List<Recipe<?>> downstreamRecipes = recipesByIngredient.getOrDefault(currentItem, List.of());
                     for (Recipe<?> recipe : downstreamRecipes) {
                         try {
-                            ResourceLocation outputId = getOutputItemId(recipe);
+                            Identifier outputId = getOutputItemId(recipe);
                             if (outputId == null) continue;
                             String outputStr = outputId.toString();
 
@@ -145,10 +148,10 @@ public final class NutritionAutoGenerateService {
         List<NutritionGroupJson> groups = NutritionDataRegistry.groups();
         for (NutritionGroupJson group : groups) {
             TagKey<Item> groupTag = ItemTags.create(
-                    ResourceLocation.fromNamespaceAndPath("nutrition", group.groupName));
+                    Identifier.fromNamespaceAndPath("nutrition", group.groupName));
             for (Item item : BuiltInRegistries.ITEM) {
                 if (item.getDefaultInstance().is(groupTag)) {
-                    ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
+                    Identifier itemId = BuiltInRegistries.ITEM.getKey(item);
                     if (itemId == null) continue;
                     known.computeIfAbsent(itemId.toString(), k -> new HashSet<>())
                             .add(group.groupName);
@@ -186,9 +189,9 @@ public final class NutritionAutoGenerateService {
             Set<String> groups = entry.getValue();
             if (groups == null || groups.isEmpty()) continue;
 
-            ResourceLocation blockId = ResourceLocation.tryParse(blockItemId);
+            Identifier blockId = Identifier.tryParse(blockItemId);
             if (blockId == null) continue;
-            Item item = BuiltInRegistries.ITEM.get(blockId);
+            Item item = BuiltInRegistries.ITEM.getValue(blockId);
             if (item == null) continue;
             Block block = Block.byItem(item);
             if (block == Blocks.AIR) continue;
@@ -214,11 +217,11 @@ public final class NutritionAutoGenerateService {
                     BlockState state = defaultState.setValue(servingsProp, s);
                     ItemStack servingStack = (ItemStack) getServingMethod.invoke(block, state);
                     Item servingItem = servingStack.getItem();
-                    ResourceLocation servingId = BuiltInRegistries.ITEM.getKey(servingItem);
+                    Identifier servingId = BuiltInRegistries.ITEM.getKey(servingItem);
                     if (servingId == null) continue;
 
                     // 食材有 FoodProperties 才传播（edible 才有营养值意义）
-                    if (servingStack.getFoodProperties(null) != null) {
+                    if (servingStack.get(DataComponents.FOOD) != null) {
                         NutritionDataRegistry.autoGeneratedItemSource().putGroups(servingId, groups);
                         count++;
                     }
@@ -234,12 +237,12 @@ public final class NutritionAutoGenerateService {
      * 建立 output item → recipes 反向索引。
      * 用于 find-seeds 等命令确定哪些物品有配方产出。
      */
-    public static Map<ResourceLocation, List<Recipe<?>>> buildRecipeOutputIndex(MinecraftServer server) {
-        Map<ResourceLocation, List<Recipe<?>>> index = new LinkedHashMap<>();
+    public static Map<Identifier, List<Recipe<?>>> buildRecipeOutputIndex(MinecraftServer server) {
+        Map<Identifier, List<Recipe<?>>> index = new LinkedHashMap<>();
         for (RecipeHolder<?> holder : server.getRecipeManager().getRecipes()) {
             try {
                 Recipe<?> recipe = holder.value();
-                ResourceLocation outputId = getOutputItemId(recipe);
+                Identifier outputId = getOutputItemId(recipe);
                 if (outputId == null) continue;
                 index.computeIfAbsent(outputId, k -> new ArrayList<>()).add(recipe);
             } catch (Exception e) {
@@ -250,18 +253,18 @@ public final class NutritionAutoGenerateService {
     }
 
     /** 建立 ingredient → recipes 反向索引。 */
-    private static Map<ResourceLocation, List<Recipe<?>>> buildIngredientIndex(MinecraftServer server) {
-        Map<ResourceLocation, List<Recipe<?>>> index = new LinkedHashMap<>();
+    private static Map<Identifier, List<Recipe<?>>> buildIngredientIndex(MinecraftServer server) {
+        Map<Identifier, List<Recipe<?>>> index = new LinkedHashMap<>();
         int errorCount = 0;
         for (RecipeHolder<?> holder : server.getRecipeManager().getRecipes()) {
             try {
                 Recipe<?> recipe = holder.value();
-                ResourceLocation outputId = getOutputItemId(recipe);
+                Identifier outputId = getOutputItemId(recipe);
                 if (outputId == null) continue;
 
-                for (Ingredient ingredient : recipe.getIngredients()) {
-                    for (ItemStack ingredientStack : ingredient.getItems()) {
-                        ResourceLocation ingredientId = BuiltInRegistries.ITEM.getKey(ingredientStack.getItem());
+                for (Ingredient ingredient : recipe.placementInfo().ingredients()) {
+                    for (var itemHolder : ingredient.items().toList()) {
+                        Identifier ingredientId = BuiltInRegistries.ITEM.getKey(itemHolder.value());
                         if (ingredientId == null) continue;
                         index.computeIfAbsent(ingredientId, k -> new ArrayList<>()).add(recipe);
                     }
@@ -279,21 +282,26 @@ public final class NutritionAutoGenerateService {
         return index;
     }
 
-    /** 获取配方产出物品 ID（不再检查 FoodProperties）。 */
-    private static ResourceLocation getOutputItemId(Recipe<?> recipe) {
-        ItemStack output = recipe.getResultItem(null);
-        if (output.isEmpty()) return null;
-        Item item = output.getItem();
-        return BuiltInRegistries.ITEM.getKey(item);
+    /** 通过 RecipeDisplay 获取配方产出物品 ID（26.1 API）。 */
+    private static Identifier getOutputItemId(Recipe<?> recipe) {
+        try {
+            List<RecipeDisplay> displays = recipe.display();
+            if (displays.isEmpty()) return null;
+            ItemStack result = displays.getFirst().result().resolveForFirstStack(ContextMap.EMPTY);
+            if (result.isEmpty()) return null;
+            return BuiltInRegistries.ITEM.getKey(result.getItem());
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /** 收集配方中所有原料的 group 并集。 */
     private static Set<String> collectIngredientGroups(
             Recipe<?> recipe, Map<String, Set<String>> knownGroups) {
         Set<String> union = new HashSet<>();
-        for (Ingredient ingredient : recipe.getIngredients()) {
-            for (ItemStack ingredientStack : ingredient.getItems()) {
-                ResourceLocation ingredientId = BuiltInRegistries.ITEM.getKey(ingredientStack.getItem());
+        for (Ingredient ingredient : recipe.placementInfo().ingredients()) {
+            for (var holder : ingredient.items().toList()) {
+                Identifier ingredientId = BuiltInRegistries.ITEM.getKey(holder.value());
                 if (ingredientId == null) continue;
                 Set<String> groups = knownGroups.get(ingredientId.toString());
                 if (groups != null) {

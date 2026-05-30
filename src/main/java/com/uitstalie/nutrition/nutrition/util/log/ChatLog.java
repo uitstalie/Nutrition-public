@@ -3,6 +3,7 @@ package com.uitstalie.nutrition.nutrition.util.log;
 import com.uitstalie.nutrition.nutrition.api.data.NutritionDataRegistry;
 import com.uitstalie.nutrition.nutrition.network.data.ChatLogFromServerPacket;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -28,26 +29,27 @@ public class ChatLog {
             "[Server] ", Style.EMPTY.withColor(ChatFormatting.YELLOW).withBold(true)
     ));
 
-    public static void send(MutableComponent component){
-
-        if(!NutritionDataRegistry.isChatLogEnabled()){
+    public static void send(MutableComponent component) {
+        if (!NutritionDataRegistry.isChatLogEnabled()) {
             return;
         }
 
         MutableComponent message = component.copy();
-        if (FMLEnvironment.dist.isClient()) {
-            LocalPlayer player = getClientPlayer();
-            if (player != null && player.level().isClientSide()) {
-                player.sendSystemMessage(PREFIX_CLIENT.copy().append(message));
-            }
+
+        if (FMLEnvironment.getDist().isDedicatedServer()) {
+            // 专用服务端：通过网络包广播给所有玩家
+            ChatLogFromServerPacket.sendToAll(PREFIX_SERVER.copy().append(message));
             return;
         }
 
-        ChatLogFromServerPacket.sendToAll(PREFIX_SERVER.copy().append(message));
-
+        // 集成客户端（或纯客户端）：投递到 render 线程发给本地玩家
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player != null) {
+            Minecraft.getInstance().execute(
+                    () -> player.sendSystemMessage(PREFIX_CLIENT.copy().append(message)));
+        }
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
     private static LocalPlayer getClientPlayer() {
         return net.minecraft.client.Minecraft.getInstance().player;
     }

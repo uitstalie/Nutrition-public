@@ -9,11 +9,9 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
@@ -21,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 public record UpdateSimpleFoodPacket(ItemStack itemStack) implements CustomPacketPayload {
 
     public static final Type<UpdateSimpleFoodPacket> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(Nutrition.MOD_ID, "update_simple_food_packet"));
+            Identifier.fromNamespaceAndPath(Nutrition.MOD_ID, "update_simple_food_packet"));
     public static final StreamCodec<RegistryFriendlyByteBuf, UpdateSimpleFoodPacket> CODEC = CustomPacketPayload.codec(
             UpdateSimpleFoodPacket::encode, UpdateSimpleFoodPacket::decode
     );
@@ -40,12 +38,10 @@ public record UpdateSimpleFoodPacket(ItemStack itemStack) implements CustomPacke
     }
 
     public static void handle(UpdateSimpleFoodPacket message, IPayloadContext context) {
-        if (context.flow().isClientbound()) {
-            context.enqueueWork(() -> handle(message));
-        }
+        context.enqueueWork(() -> handle(message));
     }
 
-    @OnlyIn(Dist.CLIENT)
+
     private static void handle(UpdateSimpleFoodPacket packet) {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player != null) {
@@ -55,7 +51,7 @@ public record UpdateSimpleFoodPacket(ItemStack itemStack) implements CustomPacke
     }
 
     public static void sendTo(ServerPlayer player, String itemId) {
-        ItemStack stack = new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemId)));
+        ItemStack stack = new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.parse(itemId)));
         sendTo(player, stack);
     }
 

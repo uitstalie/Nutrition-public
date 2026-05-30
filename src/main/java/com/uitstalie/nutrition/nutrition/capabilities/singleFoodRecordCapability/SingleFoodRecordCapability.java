@@ -1,12 +1,11 @@
 package com.uitstalie.nutrition.nutrition.capabilities.singleFoodRecordCapability;
 
-import net.minecraft.core.HolderLookup;
+import com.mojang.serialization.DataResult;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.util.INBTSerializable;
-import org.jetbrains.annotations.NotNull;
 
-public class SingleFoodRecordCapability implements INBTSerializable<CompoundTag> {
+public class SingleFoodRecordCapability {
 
     private ItemStack currentEatenFood;
 
@@ -24,21 +23,20 @@ public class SingleFoodRecordCapability implements INBTSerializable<CompoundTag>
         return currentEatenFood;
     }
 
-    @Override
-    public CompoundTag serializeNBT(HolderLookup.@NotNull Provider provider) {
+    public CompoundTag save() {
         CompoundTag tag = new CompoundTag();
         if (!this.currentEatenFood.isEmpty()) {
-            tag.put("food", this.currentEatenFood.saveOptional(provider));
+            DataResult<net.minecraft.nbt.Tag> result = ItemStack.OPTIONAL_CODEC.encodeStart(NbtOps.INSTANCE, this.currentEatenFood);
+            result.result().ifPresent(t -> tag.put("food", t));
         }
         return tag;
     }
 
-    @Override
-    public void deserializeNBT(HolderLookup.@NotNull Provider provider, CompoundTag tag) {
+    public void load(CompoundTag tag) {
         if (tag.contains("food")) {
-            this.currentEatenFood = ItemStack.parseOptional(provider, tag.getCompound("food"));
-        }
-        else {
+            this.currentEatenFood = ItemStack.OPTIONAL_CODEC.parse(NbtOps.INSTANCE, tag.get("food"))
+                .result().orElse(ItemStack.EMPTY);
+        } else {
             this.currentEatenFood = ItemStack.EMPTY;
         }
     }

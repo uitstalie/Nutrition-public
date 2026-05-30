@@ -10,7 +10,7 @@ import com.uitstalie.nutrition.nutrition.util.data.NutritionDataStorage;
 import com.uitstalie.nutrition.nutrition.util.data.ValueFormulaEvaluator;
 import com.uitstalie.nutrition.nutrition.util.log.Log;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
@@ -27,7 +27,7 @@ public final class NutritionFoodService {
     public static void applyFoodNutrition(ServerPlayer player, ItemStack itemStack, int healing, float saturation) {
         if (player == null || itemStack == null || itemStack.isEmpty()) return;
 
-        ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(itemStack.getItem());
+        Identifier itemId = BuiltInRegistries.ITEM.getKey(itemStack.getItem());
         if (itemId == null) return;
         String itemIdStr = itemId.toString();
 

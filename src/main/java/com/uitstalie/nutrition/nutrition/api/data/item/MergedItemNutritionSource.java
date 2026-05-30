@@ -1,6 +1,6 @@
 package com.uitstalie.nutrition.nutrition.api.data.item;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -26,7 +26,7 @@ public class MergedItemNutritionSource implements ItemNutritionSource {
     }
 
     @Override
-    public NutritionItemJson getItemConfig(ResourceLocation itemId) {
+    public NutritionItemJson getItemConfig(Identifier itemId) {
         if (itemId == null) return null;
         for (ItemNutritionSource source : sources) {
             NutritionItemJson config = source.getItemConfig(itemId);

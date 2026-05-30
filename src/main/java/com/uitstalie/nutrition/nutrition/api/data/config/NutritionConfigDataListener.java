@@ -1,12 +1,11 @@
 package com.uitstalie.nutrition.nutrition.api.data.config;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.mojang.serialization.JsonOps;
 import com.uitstalie.nutrition.nutrition.api.data.DataPackJsonLoader;
 import com.uitstalie.nutrition.nutrition.util.log.Log;
-import net.minecraft.resources.ResourceLocation;
+import com.mojang.serialization.JsonOps;
+import com.google.gson.JsonElement;
+import net.minecraft.resources.FileToIdConverter;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -18,30 +17,20 @@ import java.util.Map;
  * 全局配置加载器。
  * 监听 {@code data/nutrition/config/} 目录。
  */
-public class NutritionConfigDataListener extends SimpleJsonResourceReloadListener {
-
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+public class NutritionConfigDataListener extends SimpleJsonResourceReloadListener<NutritionConfigJson> {
 
     private NutritionConfigJson config;
 
     public NutritionConfigDataListener() {
-        super(GSON, "config");
+        super(NutritionConfigJson.CODEC, FileToIdConverter.json("config"));
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> map, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profilerFiller) {
+    protected void apply(Map<Identifier, NutritionConfigJson> map, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profilerFiller) {
         for (var entry : map.entrySet()) {
-            try {
-                var parsed = NutritionConfigJson.CODEC.parse(JsonOps.INSTANCE, entry.getValue());
-                config = parsed.getOrThrow(error -> {
-                    Log.e("NutritionConfig", "Failed parsing config: " + entry.getKey() + " — " + error);
-                    return new RuntimeException(error);
-                });
-                Log.d("NutritionConfig", "Loaded config: " + entry.getKey());
-                return;
-            } catch (Exception e) {
-                Log.e("NutritionConfig", "Failed parsing config: " + entry.getKey() + " — " + e.getMessage());
-            }
+            config = entry.getValue();
+            Log.d("NutritionConfig", "Loaded config: " + entry.getKey());
+            return;
         }
     }
 

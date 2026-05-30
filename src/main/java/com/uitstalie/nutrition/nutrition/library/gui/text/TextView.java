@@ -1,9 +1,9 @@
 package com.uitstalie.nutrition.nutrition.library.gui.text;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
+import org.joml.Matrix3x2fStack;
 
 import com.uitstalie.nutrition.nutrition.library.color.Color;
 import com.uitstalie.nutrition.nutrition.library.color.ColorUtils;
@@ -49,12 +49,13 @@ public class TextView extends View {
     }
 
     @Override
-    protected void draw(GuiGraphics guiGraphics) {
-        PoseStack pose = guiGraphics.pose();
-        pose.translate(x, y, 0);
+    protected void draw(GuiGraphicsExtractor guiGraphics) {
+        Matrix3x2fStack pose = guiGraphics.pose();
+        pose.pushMatrix();
+        pose.translate(x, y);
 
         if (isCenter) {
-            guiGraphics.drawCenteredString(
+            guiGraphics.centeredText(
                     Minecraft.getInstance().font,
                     text,
                     0,
@@ -62,7 +63,7 @@ public class TextView extends View {
                     color.hex()
             );
         } else {
-            guiGraphics.drawString(
+            guiGraphics.text(
                     Minecraft.getInstance().font,
                     text,
                     0,
@@ -70,5 +71,6 @@ public class TextView extends View {
                     color.hex()
             );
         }
+        pose.popMatrix();
     }
 }

@@ -1,0 +1,16 @@
+// 1.21.1	2026-05-29T23:18:18.735333553	items generator for nutrition
+3c1aea23312f8cdae974dc0801ef27b1717740af data/nutrition/items/coffee.json
+4bf2409765f7d7b168c2fe4c728b3b48e6f702cb data/nutrition/items/eggs.json
+9149fbbdef267f2641f28faf871ae6441e6d2c8c data/nutrition/items/fishs.json
+33a6db7f36de7551976fc3f6e3c122458f037afe data/nutrition/items/fruits.json
+a7ba013b325c6f3be2ad653485379b69d0d9b6f1 data/nutrition/items/grains.json
+71c68e6824e7db40fb34294441ab843435377f4d data/nutrition/items/honeys.json
+b6290d8c50d047c16d0bb8e0c61f215f321361d4 data/nutrition/items/milks.json
+a62dbc51cb6395a4c6845b8aa9b3519834af7a38 data/nutrition/items/mushrooms.json
+b08c450e6987bedb3125c21ffc11023a3042c7eb data/nutrition/items/nuts.json
+32fdd55085af4f49fd489bdd050f5a87617d1e91 data/nutrition/items/proteins.json
+30d97f370d573413adcf21ebae6f3bdd86e92d97 data/nutrition/items/salt.json
+4a4be1777de1347d40262a716e1482b36075db78 data/nutrition/items/sugars.json
+a850a12aa0f957f4963b410ef218134a71007318 data/nutrition/items/trace_elements.json
+755d9dda893d7e53ef6584e0743d1328811bd6e5 data/nutrition/items/vegetables.json
+ed2283561db9aea03ece344f40a2cb6f78948a3b data/nutrition/items/wines.json

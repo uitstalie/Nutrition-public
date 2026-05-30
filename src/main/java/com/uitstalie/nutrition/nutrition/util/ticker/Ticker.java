@@ -80,7 +80,7 @@ public class Ticker {
                     } catch (Exception e) {
                         // 单个回调异常不应打断其他回调
                         Log.e("Ticker", "Second event callback failed for "
-                                + player.getGameProfile().getName() + ": " + e.getMessage());
+                                + player.getGameProfile().name() + ": " + e.getMessage());
                     }
                 }
             }

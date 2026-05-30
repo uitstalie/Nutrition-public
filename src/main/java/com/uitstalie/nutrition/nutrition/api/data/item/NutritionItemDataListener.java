@@ -1,12 +1,11 @@
 package com.uitstalie.nutrition.nutrition.api.data.item;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import com.uitstalie.nutrition.nutrition.api.data.DataPackJsonLoader;
 import com.uitstalie.nutrition.nutrition.util.log.Log;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.FileToIdConverter;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -26,9 +25,7 @@ import java.util.Set;
  *
  * <p>内部构建快速查询索引：item → groups、item → group → manualValue。</p>
  */
-public class NutritionItemDataListener extends SimpleJsonResourceReloadListener implements ItemNutritionSource {
-
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+public class NutritionItemDataListener extends SimpleJsonResourceReloadListener<NutritionItemJson> implements ItemNutritionSource {
 
     /** groupName → NutritionItemJson */
     private final Map<String, NutritionItemJson> groupConfigs = new LinkedHashMap<>();
@@ -38,43 +35,31 @@ public class NutritionItemDataListener extends SimpleJsonResourceReloadListener 
     private final Map<String, Set<String>> itemGroups = new HashMap<>();
 
     public NutritionItemDataListener() {
-        super(GSON, "items");
+        super(NutritionItemJson.CODEC, FileToIdConverter.json("items"));
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> map, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profilerFiller) {
+    protected void apply(Map<Identifier, NutritionItemJson> map, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profilerFiller) {
         groupConfigs.clear();
         manualValues.clear();
         itemGroups.clear();
 
-        map.forEach((key, json) -> {
-            try {
-                var parsed = NutritionItemJson.CODEC.parse(JsonOps.INSTANCE, json);
-                var result = parsed.getOrThrow(error -> {
-                    Log.e("NutritionItem", "Failed parsing item group: " + key + " — " + error);
-                    return new RuntimeException(error);
-                });
+        map.forEach((key, result) -> {
+            if (!result.isValid()) {
+                Log.w("NutritionItem", "Skipping invalid item group: " + key);
+                return;
+            }
 
-                if (!result.isValid()) {
-                    Log.w("NutritionItem", "Skipping invalid item group: " + key);
-                    return;
+            String groupName = result.groups;
+            Log.d("NutritionItem", "Loaded item group: " + groupName + " with " + result.items.size() + " items");
+            groupConfigs.put(groupName, result);
+
+            for (NutritionItemJson.ItemEntry entry : result.items) {
+                itemGroups.computeIfAbsent(entry.item(), k -> new HashSet<>()).add(groupName);
+                if (entry.hasManualValue()) {
+                    manualValues.computeIfAbsent(entry.item(), k -> new HashMap<>())
+                            .put(groupName, entry.value());
                 }
-
-                String groupName = result.groups;
-                Log.d("NutritionItem", "Loaded item group: " + groupName + " with " + result.items.size() + " items");
-                groupConfigs.put(groupName, result);
-
-                for (NutritionItemJson.ItemEntry entry : result.items) {
-                    // 建 item → groups 索引
-                    itemGroups.computeIfAbsent(entry.item(), k -> new HashSet<>()).add(groupName);
-                    // 建手动值索引
-                    if (entry.hasManualValue()) {
-                        manualValues.computeIfAbsent(entry.item(), k -> new HashMap<>())
-                                .put(groupName, entry.value());
-                    }
-                }
-            } catch (Exception e) {
-                Log.e("NutritionItem", "Failed parsing item group: " + key + " — " + e.getMessage());
             }
         });
 
@@ -111,7 +96,7 @@ public class NutritionItemDataListener extends SimpleJsonResourceReloadListener 
 
     @Override
     @Nullable
-    public NutritionItemJson getItemConfig(ResourceLocation itemId) {
+    public NutritionItemJson getItemConfig(Identifier itemId) {
         // 不再支持 per-item 查询，返回 null
         return null;
     }

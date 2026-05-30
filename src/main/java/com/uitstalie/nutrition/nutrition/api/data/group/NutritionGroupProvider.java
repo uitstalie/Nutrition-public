@@ -4,9 +4,7 @@ import com.uitstalie.nutrition.nutrition.Nutrition;
 import com.uitstalie.nutrition.nutrition.library.color.DefaultColor;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackType;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.common.data.JsonCodecProvider;
 
 import java.util.concurrent.CompletableFuture;
@@ -17,8 +15,8 @@ import java.util.concurrent.CompletableFuture;
  */
 public class NutritionGroupProvider extends JsonCodecProvider<NutritionGroupJson> {
 
-    public NutritionGroupProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, ExistingFileHelper existingFileHelper) {
-        super(output, PackOutput.Target.DATA_PACK, "groups", PackType.SERVER_DATA, NutritionGroupJson.CODEC, lookupProvider, Nutrition.MOD_ID, existingFileHelper);
+    public NutritionGroupProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
+        super(output, PackOutput.Target.DATA_PACK, "groups", NutritionGroupJson.CODEC, lookupProvider, Nutrition.MOD_ID);
     }
 
     private static final int DEFAULT_DECAY_VALUE = 5;
@@ -46,7 +44,7 @@ public class NutritionGroupProvider extends JsonCodecProvider<NutritionGroupJson
 
     private void add(String name, String icon, int color) {
         this.unconditional(
-                ResourceLocation.fromNamespaceAndPath(Nutrition.MOD_ID, name),
+                Identifier.fromNamespaceAndPath(Nutrition.MOD_ID, name),
                 new NutritionGroupJson(name, icon,
                         DefaultColor.of((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, (color >> 24) & 0xFF),
                         DefaultColor.of((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, (color >> 24) & 0xFF),

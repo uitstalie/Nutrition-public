@@ -119,13 +119,13 @@ public class FoodRecordWindow {
 
     public void deserializeNBT(CompoundTag root) {
         records.clear();
-        elapsedSeconds = root.getInt("elapsedSeconds");
+        elapsedSeconds = root.getIntOr("elapsedSeconds", 0);
         if (root.contains("records")) {
-            ListTag list = root.getList("records", Tag.TAG_COMPOUND);
+            ListTag list = root.getListOrEmpty("records");
             for (int i = 0; i < list.size(); i++) {
-                CompoundTag entry = list.getCompound(i);
-                String itemId = entry.getString("item");
-                int ts = entry.getInt("t");
+                CompoundTag entry = list.getCompoundOrEmpty(i);
+                String itemId = entry.getStringOr("item", "");
+                int ts = entry.getIntOr("t", 0);
                 records.add(new Record(itemId, ts));
             }
         }

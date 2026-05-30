@@ -6,7 +6,7 @@ import com.uitstalie.nutrition.nutrition.util.data.NutritionDataStorage;
 import com.uitstalie.nutrition.nutrition.util.log.Log;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -27,7 +27,7 @@ import java.util.Map;
  *   <li>effect：duration {@link #EFFECT_DURATION_TICKS} tick，条件命中时刷新，
  *       条件不命中时不主动移除，由原版自然过期</li>
  *   <li>attribute：条件命中时施加 modifier，不命中时主动移除，
- *       通过 {@link ResourceLocation} 实现来源隔离</li>
+ *       通过 {@link Identifier} 实现来源隔离</li>
  * </ul>
  *
  * <h3>来源隔离</h3>
@@ -50,11 +50,11 @@ public final class NutritionEffectApplier {
      *
      * @param player       目标玩家
      * @param cap          玩家营养能力
-     * @param allEffects   所有已加载的 effect 配置文件（key = ResourceLocation）
+     * @param allEffects   所有已加载的 effect 配置文件（key = Identifier）
      */
     public static void refreshAll(ServerPlayer player,
                                   NutritionCapability cap,
-                                  Map<ResourceLocation, NutritionEffectJson> allEffects) {
+                                  Map<Identifier, NutritionEffectJson> allEffects) {
         if (player == null || cap == null || allEffects == null || allEffects.isEmpty()) return;
 
         NutritionDataStorage nutritionData = cap.getNutritionData();
@@ -62,7 +62,7 @@ public final class NutritionEffectApplier {
         List<ActiveAttributeState> activeAttributes = new ArrayList<>();
 
         for (var entry : allEffects.entrySet()) {
-            ResourceLocation fileId = entry.getKey();
+            Identifier fileId = entry.getKey();
             NutritionEffectJson effectFile = entry.getValue();
 
             if (effectFile.entries == null || effectFile.entries.isEmpty()) continue;
@@ -88,7 +88,7 @@ public final class NutritionEffectApplier {
                     for (NutritionEffectJson.EffectEntry e : ce.effects()) {
                         if (!e.isValid()) continue;
                         applyEffect(player, e, fileId);
-                        ResourceLocation effectId = ResourceLocation.tryParse(e.name());
+                        Identifier effectId = Identifier.tryParse(e.name());
                         if (effectId != null) {
                             activeEffects.add(new ActiveEffectState(effectId, e.power()));
                         }
@@ -99,10 +99,10 @@ public final class NutritionEffectApplier {
                     for (int attrIdx = 0; attrIdx < ce.attributes().size(); attrIdx++) {
                         NutritionEffectJson.AttributeEntry a = ce.attributes().get(attrIdx);
                         if (!a.isValid()) continue;
-                        ResourceLocation modifierId = attributeModifierId(fileId, entryIdx, attrIdx);
+                        Identifier modifierId = attributeModifierId(fileId, entryIdx, attrIdx);
                         applyAttribute(player, a, modifierId);
                         activeAttributes.add(new ActiveAttributeState(
-                                ResourceLocation.tryParse(a.name()),
+                                Identifier.tryParse(a.name()),
                                 a.amount(),
                                 a.operation().name()));
                     }
@@ -122,14 +122,14 @@ public final class NutritionEffectApplier {
     // ────────── Effect ──────────
 
     private static void applyEffect(ServerPlayer player, NutritionEffectJson.EffectEntry e,
-                                    ResourceLocation fileId) {
-        ResourceLocation effectId = ResourceLocation.tryParse(e.name());
+                                    Identifier fileId) {
+        Identifier effectId = Identifier.tryParse(e.name());
         if (effectId == null) {
             Log.w("NutritionEffect", "Invalid effect name: " + e.name() + " in " + fileId);
             return;
         }
 
-        Holder<MobEffect> effect = BuiltInRegistries.MOB_EFFECT.getHolder(effectId).orElse(null);
+        Holder<MobEffect> effect = BuiltInRegistries.MOB_EFFECT.get(effectId).orElse(null);
         if (effect == null) {
             Log.w("NutritionEffect", "Unknown effect: " + e.name() + " in " + fileId);
             return;
@@ -149,14 +149,14 @@ public final class NutritionEffectApplier {
     // ────────── Attribute ──────────
 
     private static void applyAttribute(ServerPlayer player, NutritionEffectJson.AttributeEntry a,
-                                       ResourceLocation modifierId) {
-        ResourceLocation attrId = ResourceLocation.tryParse(a.name());
+                                       Identifier modifierId) {
+        Identifier attrId = Identifier.tryParse(a.name());
         if (attrId == null) {
             Log.w("NutritionEffect", "Invalid attribute name: " + a.name());
             return;
         }
 
-        Holder<Attribute> attribute = BuiltInRegistries.ATTRIBUTE.getHolder(attrId).orElse(null);
+        Holder<Attribute> attribute = BuiltInRegistries.ATTRIBUTE.get(attrId).orElse(null);
 
         AttributeInstance instance = player.getAttribute(attribute);
         if (instance == null) {
@@ -177,11 +177,11 @@ public final class NutritionEffectApplier {
     }
 
     private static void removeAttribute(ServerPlayer player, NutritionEffectJson.AttributeEntry a,
-                                        ResourceLocation modifierId) {
-        ResourceLocation attrId = ResourceLocation.tryParse(a.name());
+                                        Identifier modifierId) {
+        Identifier attrId = Identifier.tryParse(a.name());
         if (attrId == null) return;
 
-        Holder<Attribute> attribute = BuiltInRegistries.ATTRIBUTE.getHolder(attrId).orElse(null);
+        Holder<Attribute> attribute = BuiltInRegistries.ATTRIBUTE.get(attrId).orElse(null);
         if (attribute == null) return;
 
         AttributeInstance instance = player.getAttribute(attribute);
@@ -193,8 +193,8 @@ public final class NutritionEffectApplier {
     /**
      * 为 attribute modifier 生成唯一 ID，用于来源隔离。
      */
-    private static ResourceLocation attributeModifierId(ResourceLocation fileId, int entryIndex, int attrIndex) {
+    private static Identifier attributeModifierId(Identifier fileId, int entryIndex, int attrIndex) {
         String path = "attr/" + fileId.getNamespace() + "/" + fileId.getPath() + "/" + entryIndex + "/" + attrIndex;
-        return ResourceLocation.fromNamespaceAndPath("nutrition", path);
+        return Identifier.fromNamespaceAndPath("nutrition", path);
     }
 }

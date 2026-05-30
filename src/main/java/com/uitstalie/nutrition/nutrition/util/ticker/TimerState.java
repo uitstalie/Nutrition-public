@@ -90,9 +90,9 @@ public class TimerState {
     }
 
     public void deserializeNBT(CompoundTag tag) {
-        this.remainingSeconds = tag.getInt("remainingSeconds");
-        this.frequencySeconds = tag.getInt("frequencySeconds");
-        this.offsetAssigned = tag.getBoolean("offsetAssigned");
+        this.remainingSeconds = tag.getIntOr("remainingSeconds", 0);
+        this.frequencySeconds = tag.getIntOr("frequencySeconds", 0);
+        this.offsetAssigned = tag.getBooleanOr("offsetAssigned", false);
         if (this.frequencySeconds <= 0) {
             this.frequencySeconds = 3;
         }

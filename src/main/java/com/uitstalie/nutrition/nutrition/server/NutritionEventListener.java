@@ -5,6 +5,7 @@ import com.uitstalie.nutrition.nutrition.capabilities.nutrition.NutritionCapabil
 import com.uitstalie.nutrition.nutrition.registry.AttributeTypeRegistry;
 import com.uitstalie.nutrition.nutrition.service.NutritionFoodService;
 import com.uitstalie.nutrition.nutrition.util.log.Log;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.food.FoodProperties;
@@ -39,7 +40,7 @@ public class NutritionEventListener {
         if (itemStack.isEmpty()) return;
 
         // 从物品提取 healing/saturation
-        FoodProperties foodProps = itemStack.getFoodProperties(player);
+        FoodProperties foodProps = itemStack.get(DataComponents.FOOD);
         int healing = foodProps != null ? foodProps.nutrition() : 0;
         float saturation = foodProps != null ? foodProps.saturation() : 0f;
 

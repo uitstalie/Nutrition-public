@@ -5,7 +5,7 @@ import com.uitstalie.nutrition.nutrition.capabilities.foodRecordCapability.FoodR
 import com.uitstalie.nutrition.nutrition.capabilities.nutrition.NutritionCapability;
 import com.uitstalie.nutrition.nutrition.capabilities.singleFoodRecordCapability.SingleFoodRecordCapability;
 import com.uitstalie.nutrition.nutrition.registry.AttributeTypeRegistry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.neoforged.neoforge.capabilities.EntityCapability;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
@@ -15,9 +15,9 @@ import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
  * capabilities 的总类，负责注册和使用capabilities
  */
 public class NutritionCapabilities {
-    public static final ResourceLocation NUTRITION = ResourceLocation.fromNamespaceAndPath(Nutrition.MOD_ID,"nutrition");
-    public static final ResourceLocation SINGLEFOOD = ResourceLocation.fromNamespaceAndPath(Nutrition.MOD_ID,"singlefood");
-    public static final ResourceLocation NUTRITION_FOOD_RECORD = ResourceLocation.fromNamespaceAndPath(Nutrition.MOD_ID,"nutrition_food_record");
+    public static final Identifier NUTRITION = Identifier.fromNamespaceAndPath(Nutrition.MOD_ID,"nutrition");
+    public static final Identifier SINGLEFOOD = Identifier.fromNamespaceAndPath(Nutrition.MOD_ID,"singlefood");
+    public static final Identifier NUTRITION_FOOD_RECORD = Identifier.fromNamespaceAndPath(Nutrition.MOD_ID,"nutrition_food_record");
 
     public static final EntityCapability<NutritionCapability,Void> NUTRITION_CAPABILITY = EntityCapability.createVoid(NUTRITION,NutritionCapability.class);
     // 定义 FoodRecord 的 Capability 对象

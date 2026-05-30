@@ -1,0 +1,14 @@
+{
+  "groups": "sugars",
+  "items": [
+    {
+      "item": "minecraft:sugar"
+    },
+    {
+      "item": "minecraft:sugar_cane"
+    },
+    {
+      "item": "yeastnfeast:maple_syrup"
+    }
+  ]
+}

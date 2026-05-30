@@ -1,0 +1,26 @@
+{
+  "groups": "nuts",
+  "items": [
+    {
+      "item": "minecraft:cocoa_beans"
+    },
+    {
+      "item": "croptopia:almond"
+    },
+    {
+      "item": "croptopia:cashew"
+    },
+    {
+      "item": "croptopia:nutmeg"
+    },
+    {
+      "item": "croptopia:peanut"
+    },
+    {
+      "item": "croptopia:pecan"
+    },
+    {
+      "item": "croptopia:walnut"
+    }
+  ]
+}

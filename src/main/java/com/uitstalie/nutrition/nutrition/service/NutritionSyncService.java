@@ -8,7 +8,8 @@ import com.uitstalie.nutrition.nutrition.network.data.NutritionDataSyncPacket;
 import com.uitstalie.nutrition.nutrition.util.data.NutritionDataStorage;
 import com.uitstalie.nutrition.nutrition.util.data.ValueFormulaEvaluator;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
@@ -106,7 +107,7 @@ public final class NutritionSyncService {
         // 转成网络包格式
         List<NutritionDataSyncPacket.ItemEntry> entries = new ArrayList<>();
         for (var e : itemGroupValues.entrySet()) {
-            ResourceLocation itemId = ResourceLocation.tryParse(e.getKey());
+            Identifier itemId = Identifier.tryParse(e.getKey());
             if (itemId == null) continue;
             List<NutritionDataSyncPacket.ItemNutritionEntry> nutritions = new ArrayList<>();
             for (var gv : e.getValue().entrySet()) {
@@ -126,11 +127,11 @@ public final class NutritionSyncService {
         if (manualVal != null) return manualVal;
 
         // 解析物品 → FoodProperties
-        ResourceLocation itemRl = ResourceLocation.tryParse(itemIdStr);
+        Identifier itemRl = Identifier.tryParse(itemIdStr);
         if (itemRl == null) return -1;
-        Item item = BuiltInRegistries.ITEM.get(itemRl);
+        Item item = BuiltInRegistries.ITEM.getValue(itemRl);
         ItemStack stack = new ItemStack(item);
-        FoodProperties food = stack.getFoodProperties(null);
+        FoodProperties food = stack.get(DataComponents.FOOD);
 
         // 无 FoodProperties 且无手动值的非食物物品，跳过
         if (food == null) return -1;

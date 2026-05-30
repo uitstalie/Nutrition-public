@@ -1,6 +1,6 @@
 package com.uitstalie.nutrition.nutrition.api.data.item;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ import java.util.List;
 public class TagItemNutritionSource implements ItemNutritionSource {
 
     @Override
-    public NutritionItemJson getItemConfig(ResourceLocation itemId) {
+    public NutritionItemJson getItemConfig(Identifier itemId) {
         return null;
     }
 

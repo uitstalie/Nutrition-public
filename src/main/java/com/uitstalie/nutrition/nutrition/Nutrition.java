@@ -19,8 +19,8 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.data.event.GatherDataEvent;
-import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.data.event.GatherDataEvent.Server;
+import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
@@ -72,26 +72,26 @@ public class Nutrition {
         NutritionAutoGenerateService.autoGenerateIfNeeded(event.getServer());
     }
 
-    private void gatherData(GatherDataEvent event) {
+    private void gatherData(Server event) {
         event.getGenerator().addProvider(
-                event.includeServer(),
-                new NutritionConfigProvider(event.getGenerator().getPackOutput(), event.getLookupProvider(), event.getExistingFileHelper())
+                true,
+                new NutritionConfigProvider(event.getGenerator().getPackOutput(), event.getLookupProvider())
         );
         event.getGenerator().addProvider(
-                event.includeServer(),
-                new NutritionGroupProvider(event.getGenerator().getPackOutput(), event.getLookupProvider(), event.getExistingFileHelper())
+                true,
+                new NutritionGroupProvider(event.getGenerator().getPackOutput(), event.getLookupProvider())
         );
         event.getGenerator().addProvider(
-                event.includeServer(),
-                new NutritionItemProvider(event.getGenerator().getPackOutput(), event.getLookupProvider(), event.getExistingFileHelper())
+                true,
+                new NutritionItemProvider(event.getGenerator().getPackOutput(), event.getLookupProvider())
         );
         event.getGenerator().addProvider(
-                event.includeServer(),
-                new NutritionEffectProvider(event.getGenerator().getPackOutput(), event.getLookupProvider(), event.getExistingFileHelper())
+                true,
+                new NutritionEffectProvider(event.getGenerator().getPackOutput(), event.getLookupProvider())
         );
     }
 
-    private void addReloadListener(AddReloadListenerEvent event) {
+    private void addReloadListener(AddServerReloadListenersEvent event) {
         NutritionDataRegistry.addReloadListeners(event);
     }
 }

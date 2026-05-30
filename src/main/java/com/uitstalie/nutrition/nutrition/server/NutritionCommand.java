@@ -11,9 +11,11 @@ import com.uitstalie.nutrition.nutrition.service.NutritionAutoGenerateService;
 import com.uitstalie.nutrition.nutrition.util.log.Log;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
@@ -49,7 +51,7 @@ public final class NutritionCommand {
                                                 ctx.getSource(),
                                                 StringArgumentType.getString(ctx, "group")))))
                         .then(Commands.literal("set")
-                                .requires(src -> src.hasPermission(2))
+                                .requires(src -> src.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
                                 .then(Commands.argument("group", StringArgumentType.word())
                                         .then(Commands.argument("value", IntegerArgumentType.integer(0, 100_000))
                                                 .executes(ctx -> setNutrition(
@@ -59,10 +61,10 @@ public final class NutritionCommand {
                         .then(Commands.literal("list")
                                 .executes(ctx -> listNutrition(ctx.getSource())))
                         .then(Commands.literal("autogen")
-                                .requires(src -> src.hasPermission(2))
+                                .requires(src -> src.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
                                 .executes(ctx -> autoGenerate(ctx.getSource())))
                         .then(Commands.literal("find-seeds")
-                                .requires(src -> src.hasPermission(2))
+                                .requires(src -> src.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
                                 .executes(ctx -> findSeeds(ctx.getSource(), null))
                                 .then(Commands.argument("mod", StringArgumentType.word())
                                         .executes(ctx -> findSeeds(
@@ -151,7 +153,7 @@ public final class NutritionCommand {
         src.sendSuccess(() -> Component.literal("Scanning food items..."), true);
 
         // Step 1: 建立输出→配方索引（哪些物品能通过合成产出）
-        Map<ResourceLocation, List<Recipe<?>>> outputIndex =
+        Map<Identifier, List<Recipe<?>>> outputIndex =
                 NutritionAutoGenerateService.buildRecipeOutputIndex(src.getServer());
 
         // Step 2: 遍历所有物品，收集"可食用但无配方产出"的种子
@@ -159,11 +161,11 @@ public final class NutritionCommand {
         int totalFoodCount = 0;
 
         for (Item item : BuiltInRegistries.ITEM) {
-            FoodProperties food = item.getDefaultInstance().getFoodProperties(null);
+            FoodProperties food = item.getDefaultInstance().get(DataComponents.FOOD);
             if (food == null) continue;
             totalFoodCount++;
 
-            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
+            Identifier itemId = BuiltInRegistries.ITEM.getKey(item);
             if (itemId == null) continue;
 
             // 如果有配方产出此物品 → 不是种子（autogen 会处理）

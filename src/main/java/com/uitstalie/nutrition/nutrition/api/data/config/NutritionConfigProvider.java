@@ -4,9 +4,7 @@ import com.uitstalie.nutrition.nutrition.Nutrition;
 import com.uitstalie.nutrition.nutrition.util.data.ValueRange;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackType;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.common.data.JsonCodecProvider;
 
 import java.util.List;
@@ -18,8 +16,8 @@ import java.util.concurrent.CompletableFuture;
  */
 public class NutritionConfigProvider extends JsonCodecProvider<NutritionConfigJson> {
 
-    public NutritionConfigProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, ExistingFileHelper existingFileHelper) {
-        super(output, PackOutput.Target.DATA_PACK, "config", PackType.SERVER_DATA, NutritionConfigJson.CODEC, lookupProvider, Nutrition.MOD_ID, existingFileHelper);
+    public NutritionConfigProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
+        super(output, PackOutput.Target.DATA_PACK, "config", NutritionConfigJson.CODEC, lookupProvider, Nutrition.MOD_ID);
     }
 
     @Override
@@ -42,7 +40,7 @@ public class NutritionConfigProvider extends JsonCodecProvider<NutritionConfigJs
         );
 
         this.unconditional(
-                ResourceLocation.fromNamespaceAndPath(Nutrition.MOD_ID, "config"),
+                Identifier.fromNamespaceAndPath(Nutrition.MOD_ID, "config"),
                 defaultConfig
         );
     }

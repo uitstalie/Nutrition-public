@@ -1,12 +1,11 @@
 package com.uitstalie.nutrition.nutrition.api.data.group;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
+import com.google.gson.JsonElement;
 import com.uitstalie.nutrition.nutrition.api.data.DataPackJsonLoader;
 import com.uitstalie.nutrition.nutrition.util.log.Log;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.FileToIdConverter;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -22,22 +21,17 @@ import java.util.Map;
  * 监听 {@code data/nutrition/groups/} 目录，解析所有 {@code *.json} 文件。
  * 校验 group_name/group_icon 非空，decay 规则合法性。
  */
-public class NutritionGroupDataListener extends SimpleJsonResourceReloadListener {
+public class NutritionGroupDataListener extends SimpleJsonResourceReloadListener<NutritionGroupJson> {
 
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-
-    private final Map<ResourceLocation, NutritionGroupJson> nutritionGroups = new LinkedHashMap<>();
+    private final Map<Identifier, NutritionGroupJson> nutritionGroups = new LinkedHashMap<>();
 
     public NutritionGroupDataListener() {
-        super(GSON, "groups");
+        super(NutritionGroupJson.CODEC, FileToIdConverter.json("groups"));
     }
 
     /**
      * 直接从 classpath 加载数据包 JSON（绕过 ResourceManager reload）。
      * 用于集成服务端等 reload 不触发的场景。
-     *
-     * @param basePath 数据包基础路径，如 "data/nutrition/groups"
-     * @param fileName JSON 文件名，如 "fruit.json"
      */
     public void loadDirectly(String basePath, String fileName) {
         String fullPath = "/" + basePath + "/" + fileName;
@@ -47,7 +41,7 @@ public class NutritionGroupDataListener extends SimpleJsonResourceReloadListener
             var result = NutritionGroupJson.CODEC.parse(JsonOps.INSTANCE, json)
                     .getOrThrow(error -> new RuntimeException("Parse error: " + error));
 
-            ResourceLocation key = ResourceLocation.fromNamespaceAndPath("nutrition",
+            Identifier key = Identifier.fromNamespaceAndPath("nutrition",
                     fileName.replace(".json", ""));
 
             if (result.groupName == null || result.groupName.isBlank()) {
@@ -71,46 +65,34 @@ public class NutritionGroupDataListener extends SimpleJsonResourceReloadListener
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> map, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profilerFiller) {
+    protected void apply(Map<Identifier, NutritionGroupJson> map, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profilerFiller) {
         nutritionGroups.clear();
 
-        map.forEach((key, json) -> {
-            try {
-                var parsed = NutritionGroupJson.CODEC.parse(JsonOps.INSTANCE, json);
-                var result = parsed.getOrThrow(error -> {
-                    Log.e("NutritionGroup", "Failed parsing group json: " + key + " — " + error);
-                    return new RuntimeException(error);
-                });
-
-                if (!ModList.get().isLoaded(key.getNamespace())) {
-                    return;
-                }
-
-                // Validate required fields
-                if (result.groupName == null || result.groupName.isBlank()) {
-                    Log.w("NutritionGroup", "Skipping group with empty group_name: " + key);
-                    return;
-                }
-                if (result.groupIcon == null || result.groupIcon.isBlank()) {
-                    Log.w("NutritionGroup", "Skipping group with empty group_icon: " + key);
-                    return;
-                }
-
-                // Validate decay config
-                if (result.decayFrequency <= 0) {
-                    Log.w("NutritionGroup", "Invalid decay_frequency in group " + key
-                            + " (must be >= 1), defaulting to 1");
-                }
-
-                Log.d("NutritionGroup", "Loaded group: " + key + " name=" + result.groupName);
-                nutritionGroups.put(key, result);
-            } catch (Exception e) {
-                Log.e("NutritionGroup", "Failed parsing group json: " + key + " — " + e.getMessage());
+        map.forEach((key, result) -> {
+            if (!ModList.get().isLoaded(key.getNamespace())) {
+                return;
             }
+
+            if (result.groupName == null || result.groupName.isBlank()) {
+                Log.w("NutritionGroup", "Skipping group with empty group_name: " + key);
+                return;
+            }
+            if (result.groupIcon == null || result.groupIcon.isBlank()) {
+                Log.w("NutritionGroup", "Skipping group with empty group_icon: " + key);
+                return;
+            }
+
+            if (result.decayFrequency <= 0) {
+                Log.w("NutritionGroup", "Invalid decay_frequency in group " + key
+                        + " (must be >= 1), defaulting to 1");
+            }
+
+            Log.d("NutritionGroup", "Loaded group: " + key + " name=" + result.groupName);
+            nutritionGroups.put(key, result);
         });
     }
 
-    public Map<ResourceLocation, NutritionGroupJson> getNutritionGroupsWithResourceLocation() {
+    public Map<Identifier, NutritionGroupJson> getNutritionGroupsWithIdentifier() {
         return nutritionGroups;
     }
 

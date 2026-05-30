@@ -3,7 +3,7 @@ package com.uitstalie.nutrition.nutrition.capabilities.foodRecordCapability;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -21,7 +21,7 @@ public class FoodRecordManager {
 
         var availableRecord = initRecord.stream()
                 .filter(foodRecord -> {
-                    ResourceLocation rs = ResourceLocation.tryParse(foodRecord.foodItemId);
+                    Identifier rs = Identifier.tryParse(foodRecord.foodItemId);
                     return rs != null;
                 })
                 .sorted(Comparator.comparingLong(r -> r.updateTick)); // 确保重载时按时间排序
@@ -71,10 +71,10 @@ public class FoodRecordManager {
         FoodRecordManager manager = new FoodRecordManager();
         List<FoodRecord> foodRecordList = new ArrayList<>();
 
-        if (foodRecordManagerTag.contains("food_records", Tag.TAG_LIST)) {
-            ListTag listTag = foodRecordManagerTag.getList("food_records", Tag.TAG_COMPOUND);
+        if (foodRecordManagerTag.contains("food_records")) {
+            ListTag listTag = foodRecordManagerTag.getListOrEmpty("food_records");
             for (int i = 0; i < listTag.size(); i++) {
-                FoodRecord record = FoodRecord.deserialize(listTag.getCompound(i));
+                FoodRecord record = FoodRecord.deserialize(listTag.getCompoundOrEmpty(i));
                 if(record != null) {
                     foodRecordList.add(record);
                 }

@@ -1,11 +1,8 @@
 package com.uitstalie.nutrition.nutrition.capabilities.foodRecordCapability;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.neoforged.neoforge.common.util.INBTSerializable;
-import org.jetbrains.annotations.NotNull;
 
-public class FoodRecordCapability implements INBTSerializable<CompoundTag> {
+public class FoodRecordCapability {
     public static final long FOOD_RECORD_EXPIRE_TICK = 60 * 5 * 20L;//5分钟过期，20tick/s 所以是60s*5*20tick/s
 
     private FoodRecordManager manager = new FoodRecordManager();
@@ -33,21 +30,19 @@ public class FoodRecordCapability implements INBTSerializable<CompoundTag> {
         manager.addRecord(record);
     }
 
-    @Override
-    public CompoundTag serializeNBT(HolderLookup.@NotNull Provider provider) {
+    public CompoundTag save() {
         CompoundTag tag = new CompoundTag();
         tag.put("foodRecordManager", FoodRecordManager.serialize(manager));
         tag.putLong("preTick", preTick);
         return tag;
     }
 
-    @Override
-    public void deserializeNBT(HolderLookup.@NotNull Provider provider, CompoundTag compoundTag) {
+    public void load(CompoundTag compoundTag) {
         if (compoundTag.contains("foodRecordManager")) {
-            manager = FoodRecordManager.deserialize(compoundTag.getCompound("foodRecordManager"));
+            manager = FoodRecordManager.deserialize(compoundTag.getCompoundOrEmpty("foodRecordManager"));
         }
         if(compoundTag.contains("preTick")){
-            preTick = compoundTag.getLong("preTick");
+            preTick = compoundTag.getLongOr("preTick", 0);
         }
     }
 }

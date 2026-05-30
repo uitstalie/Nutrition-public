@@ -85,8 +85,8 @@ class NutritionData {
     }
 
     void readNBT(CompoundTag tag) {
-        value = Math.clamp(tag.getInt("value"), MIN_VALUE, MAX_VALUE);
-        decayCountdown = tag.getInt("decayCountdown");
+        value = Math.clamp(tag.getIntOr("value", 0), MIN_VALUE, MAX_VALUE);
+        decayCountdown = tag.getIntOr("decayCountdown", 0);
     }
 }
 
@@ -181,9 +181,9 @@ public class NutritionDataStorage {
     public void deserializeNBT(CompoundTag root) {
         groups.clear();
         if (!root.contains("groups")) return;
-        CompoundTag groupsTag = root.getCompound("groups");
-        for (String key : groupsTag.getAllKeys()) {
-            CompoundTag dataTag = groupsTag.getCompound(key);
+        CompoundTag groupsTag = root.getCompoundOrEmpty("groups");
+        for (String key : groupsTag.keySet()) {
+            CompoundTag dataTag = groupsTag.getCompoundOrEmpty(key);
             NutritionData data = new NutritionData();
             data.readNBT(dataTag);
             groups.put(key, data);

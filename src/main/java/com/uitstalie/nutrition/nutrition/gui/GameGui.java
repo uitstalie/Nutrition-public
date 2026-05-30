@@ -1,28 +1,22 @@
 package com.uitstalie.nutrition.nutrition.gui;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import com.uitstalie.nutrition.nutrition.client.ClientNutritionState;
 import com.uitstalie.nutrition.nutrition.client.ClientNutritionState.SyncedAttribute;
 import com.uitstalie.nutrition.nutrition.client.ClientNutritionState.SyncedEffect;
 import com.uitstalie.nutrition.nutrition.client.ClientNutritionState.SyncedGroup;
 import com.uitstalie.nutrition.nutrition.util.log.Log;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.joml.Matrix4f;
 
 import java.util.List;
 import java.util.Map;
@@ -78,8 +72,8 @@ public class GameGui extends Screen {
     }
 
     @Override
-    public void resize(@NotNull Minecraft mc, int width, int height) {
-        super.resize(mc, width, height);
+    public void resize(int width, int height) {
+        super.resize(width, height);
         recalculateLayout();
     }
 
@@ -98,8 +92,8 @@ public class GameGui extends Screen {
     // ── Render ──────────────────────────────────────────────────────────
 
     @Override
-    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(@NotNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
 
         drawPanel(guiGraphics);
         drawTitleBar(guiGraphics);
@@ -108,7 +102,7 @@ public class GameGui extends Screen {
         drawScrollbar(guiGraphics);
     }
 
-    private void drawPanel(GuiGraphics guiGraphics) {
+    private void drawPanel(GuiGraphicsExtractor guiGraphics) {
         // Background
         guiGraphics.fill(guiLeft, guiTop, guiLeft + panelW, guiTop + panelH, COLOR_PANEL_BACKGROUND);
 
@@ -120,20 +114,20 @@ public class GameGui extends Screen {
         guiGraphics.fill(guiLeft + panelW, guiTop, guiLeft + panelW + 1, guiTop + panelH, border);
     }
 
-    private void drawTitleBar(GuiGraphics guiGraphics) {
+    private void drawTitleBar(GuiGraphicsExtractor guiGraphics) {
         int x = guiLeft + panelW / 2;
         int y = guiTop + 4;
-        guiGraphics.drawCenteredString(this.font,
+        guiGraphics.centeredText(this.font,
                 Component.translatable("nutrition.gui.title"),
                 x, y, 0xFFFFFFFF);
     }
 
-    private void drawTabArea(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+    private void drawTabArea(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
         drawTab(guiGraphics, "Info", 0, mouseX, mouseY);
         drawTab(guiGraphics, "Effects", 1, mouseX, mouseY);
     }
 
-    private void drawTab(GuiGraphics guiGraphics, String tabName, int index, int mouseX, int mouseY) {
+    private void drawTab(GuiGraphicsExtractor guiGraphics, String tabName, int index, int mouseX, int mouseY) {
         int tabX = tabX();
         int tabY = tabY(index);
         int tabW = tabWidth();
@@ -142,7 +136,7 @@ public class GameGui extends Screen {
                 ? COLOR_TAB_ACTIVE
                 : (hovered ? COLOR_TAB_HOVER : COLOR_TAB_BACKGROUND);
         guiGraphics.fill(tabX, tabY, tabX + tabW, tabY + TAB_HEIGHT, background);
-        guiGraphics.drawCenteredString(this.font, Component.literal(tabName),
+        guiGraphics.centeredText(this.font, Component.literal(tabName),
                 tabX + tabW / 2, tabY + 6, COLOR_TEXT_PRIMARY);
     }
 
@@ -170,7 +164,7 @@ public class GameGui extends Screen {
 
     private static final String[] ROMAN = {"I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"};
 
-    private void drawEffectsContent(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+    private void drawEffectsContent(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
         List<SyncedEffect> effects = ClientNutritionState.getEffects();
         List<SyncedAttribute> attributes = ClientNutritionState.getAttributes();
 
@@ -178,31 +172,31 @@ public class GameGui extends Screen {
         int x = contentLeft + CONTENT_PADDING;
 
         // ── Effects section ──
-        guiGraphics.drawString(this.font, Component.literal("== Effects =="), x, y, COLOR_EFFECT_HEADER);
+        guiGraphics.text(this.font, Component.literal("== Effects =="), x, y, COLOR_EFFECT_HEADER);
         y += 14;
         if (effects.isEmpty()) {
-            guiGraphics.drawString(this.font, Component.literal("  (none)"), x, y, COLOR_TEXT_SECONDARY);
+            guiGraphics.text(this.font, Component.literal("  (none)"), x, y, COLOR_TEXT_SECONDARY);
             y += 12;
         } else {
             for (SyncedEffect e : effects) {
                 String level = e.amplifier() < ROMAN.length ? ROMAN[e.amplifier()] : String.valueOf(e.amplifier() + 1);
                 String text = "  " + e.effectId().getPath() + " " + level;
-                guiGraphics.drawString(this.font, Component.literal(text), x, y, COLOR_TEXT_PRIMARY);
+                guiGraphics.text(this.font, Component.literal(text), x, y, COLOR_TEXT_PRIMARY);
                 y += 12;
             }
         }
 
         // ── Attributes section ──
         y += 6;
-        guiGraphics.drawString(this.font, Component.literal("== Attributes =="), x, y, COLOR_ATTRIBUTE_HEADER);
+        guiGraphics.text(this.font, Component.literal("== Attributes =="), x, y, COLOR_ATTRIBUTE_HEADER);
         y += 14;
         if (attributes.isEmpty()) {
-            guiGraphics.drawString(this.font, Component.literal("  (none)"), x, y, COLOR_TEXT_SECONDARY);
+            guiGraphics.text(this.font, Component.literal("  (none)"), x, y, COLOR_TEXT_SECONDARY);
         } else {
             for (SyncedAttribute a : attributes) {
                 String text = String.format("  %s  +%.1f  (%s)",
                         a.attributeId().getPath(), a.amount(), a.operation());
-                guiGraphics.drawString(this.font, Component.literal(text), x, y, COLOR_TEXT_PRIMARY);
+                guiGraphics.text(this.font, Component.literal(text), x, y, COLOR_TEXT_PRIMARY);
                 y += 12;
             }
         }
@@ -210,7 +204,7 @@ public class GameGui extends Screen {
 
     // ── Info page (nutrition groups) ──────────────────────────────────
 
-    private void drawContent(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+    private void drawContent(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
         if ("Effects".equals(activeTab)) {
             drawEffectsContent(guiGraphics, mouseX, mouseY);
         } else {
@@ -218,7 +212,7 @@ public class GameGui extends Screen {
         }
     }
 
-    private void drawInfoContent(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+    private void drawInfoContent(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
         List<SyncedGroup> groups = ClientNutritionState.getGroups();
         Map<String, Integer> values = ClientNutritionState.getNutritionValues();
 
@@ -226,7 +220,7 @@ public class GameGui extends Screen {
         if (groups.isEmpty()) {
             int cx = contentLeft + contentWidth / 2;
             int cy = contentTop + contentHeight / 2 - 8;
-            guiGraphics.drawCenteredString(this.font,
+            guiGraphics.centeredText(this.font,
                     Component.translatable("nutrition.gui.no_groups"),
                     cx, cy, COLOR_TEXT_SECONDARY);
             return;
@@ -269,56 +263,46 @@ public class GameGui extends Screen {
         return Math.min(COLUMNS, Math.max(1, (contentWidth + CELL_GAP) / (CELL_MIN_WIDTH + CELL_GAP)));
     }
 
-    // ── Arc progress renderer ──────────────────────────────────────────
+    // ── Arc progress bar (matrix-based radial segments) ────────────────
 
-    /**
-     * Draws a ring segment arc via immediate-mode triangle strip.
-     * Angles are in degrees, 0° = right, clockwise (screen Y-down).
-     */
-    private static void drawArc(GuiGraphics guiGraphics, float cx, float cy,
-                                float innerR, float outerR,
-                                double startAngleDeg, double sweepAngleDeg,
-                                int colorARGB, int segments) {
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
+    /** 弧半径常量 */
+    private static final int ARC_SEGMENTS = 64;
+    private static final float ARC_START_DEG = 140;
+    private static final float ARC_SWEEP_DEG = 260;
+    private static final float ARC_INNER_R = 8;
+    private static final float ARC_OUTER_R = 10.5f;
+    private static final float ARC_THICKNESS = ARC_OUTER_R - ARC_INNER_R;
 
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder builder = tesselator.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
-        Matrix4f matrix = guiGraphics.pose().last().pose();
+    private static void drawArcProgress(GuiGraphicsExtractor guiGraphics,
+                                         int centerX, int centerY,
+                                         float pct, int fillColor) {
+        var pose = guiGraphics.pose();
+        int fillSegments = Math.round(ARC_SEGMENTS * Math.min(pct / 100.0f, 1.0f));
 
-        float a = ((colorARGB >> 24) & 0xFF) / 255.0f;
-        float r = ((colorARGB >> 16) & 0xFF) / 255.0f;
-        float g = ((colorARGB >> 8) & 0xFF) / 255.0f;
-        float b = (colorARGB & 0xFF) / 255.0f;
-        if (a == 0f) a = 1f;
-
-        int steps = Math.max(2, (int) (segments * Math.abs(sweepAngleDeg) / 360.0));
-        for (int i = 0; i <= steps; i++) {
-            double angle = Math.toRadians(startAngleDeg + sweepAngleDeg * i / steps);
-            float cos = (float) Math.cos(angle);
-            float sin = (float) Math.sin(angle);
-            builder.addVertex(matrix, cx + outerR * cos, cy + outerR * sin, 0).setColor(r, g, b, a);
-            builder.addVertex(matrix, cx + innerR * cos, cy + innerR * sin, 0).setColor(r, g, b, a);
+        for (int i = 0; i < ARC_SEGMENTS; i++) {
+            float angle = (float) Math.toRadians(ARC_START_DEG + ARC_SWEEP_DEG * i / ARC_SEGMENTS);
+            pose.pushMatrix();
+            pose.translate(centerX, centerY);
+            pose.rotate(angle);
+            guiGraphics.fill((int) ARC_INNER_R, -1, (int) ARC_OUTER_R, 1,
+                    i < fillSegments ? fillColor : 0xFF555555);
+            pose.popMatrix();
         }
-
-        BufferUploader.drawWithShader(builder.buildOrThrow());
-        RenderSystem.disableBlend();
     }
 
     // ── Group cell ─────────────────────────────────────────────────────
 
-    private void drawGroupCell(GuiGraphics guiGraphics, int cx, int cy, int cw, int ch,
+    private void drawGroupCell(GuiGraphicsExtractor guiGraphics, int cx, int cy, int cw, int ch,
                                 SyncedGroup group, int nutrition) {
         // ── Row 1: icon centered ──
         int iconX = cx + (cw - 16) / 2;
         int iconY = cy + 3;
         try {
-            ResourceLocation rl = ResourceLocation.tryParse(group.groupIcon());
+            Identifier rl = Identifier.tryParse(group.groupIcon());
             if (rl != null) {
                 var item = BuiltInRegistries.ITEM.getOptional(rl);
                 if (item.isPresent() && item.get() != Items.AIR) {
-                    guiGraphics.renderItem(new ItemStack(item.get()), iconX, iconY);
+                    guiGraphics.item(new ItemStack(item.get()), iconX, iconY);
                 }
             }
         } catch (Exception e) {
@@ -327,38 +311,22 @@ public class GameGui extends Screen {
 
         float pct = nutrition / 1000.0f;           // [0, 100000] → 0.000 ~ 100.000
 
-        // ── Arc ring around icon ──
-        float arcCx = cx + cw / 2.0f;
-        float arcCy = cy + 11;                      // icon center (cy+3 + 8)
-        float outerR = 10.5f;
-        float innerR = 8.0f;
-        double startAngle = 135.0;                   // top-right, gap at bottom
-        double sweep = 260.0;                        // slightly shorter than 270°, cleaner gap
-
-        // Background: gray arc
-        drawArc(guiGraphics, arcCx, arcCy, innerR, outerR, startAngle, sweep,
-                0xFF555555, 64);
-
-        // Foreground: colored by percentage
-        if (pct > 0) {
-            double fillAngle = sweep * Math.min(pct / 100.0, 1.0);
-            int fillColor = group.guiPngColor();
-            // Ensure fully opaque
-            fillColor = 0xFF000000 | (fillColor & 0x00FFFFFF);
-            drawArc(guiGraphics, arcCx, arcCy, innerR, outerR, startAngle, fillAngle,
-                    fillColor, 64);
-        }
+        // ── Arc progress around icon ──
+        int arcCenterX = cx + cw / 2;
+        int arcCenterY = cy + 10;
+        int fillColor = 0xFF000000 | (group.guiPngColor() & 0x00FFFFFF);
+        drawArcProgress(guiGraphics, arcCenterX, arcCenterY, pct, fillColor);
 
         // ── Row 2: "name: xx.xxx%" centered ──
         String line = group.groupName() + ": " + String.format("%.3f%%", pct);
         int textX = cx + Math.max(0, (cw - this.font.width(line)) / 2);
         int textY = cy + 28;
-        guiGraphics.drawString(this.font, Component.literal(line), textX, textY, group.guiTextColor());
+        guiGraphics.text(this.font, Component.literal(line), textX, textY, group.guiTextColor());
     }
 
     // ── Scrollbar ──────────────────────────────────────────────────────
 
-    private void drawScrollbar(GuiGraphics guiGraphics) {
+    private void drawScrollbar(GuiGraphicsExtractor guiGraphics) {
         List<SyncedGroup> groups = ClientNutritionState.getGroups();
         if (groups.isEmpty()) return;
 
@@ -396,31 +364,29 @@ public class GameGui extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (isInTab(mouseX, mouseY, 0)) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean flag) {
+        if (isInTab(event.x(), event.y(), 0)) {
             activeTab = "Info";
             scrollOffset = 0;
             return true;
         }
 
-        if (isInTab(mouseX, mouseY, 1)) {
+        if (isInTab(event.x(), event.y(), 1)) {
             activeTab = "Effects";
             scrollOffset = 0;
             return true;
         }
 
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, flag);
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        // N key toggles GUI close (same key as open)
-        if (keyCode == InputConstants.KEY_N) {
+    public boolean keyPressed(KeyEvent event) {
+        if (event.key() == InputConstants.KEY_N) {
             this.onClose();
             return true;
         }
-        // ESC closes (handled by super, but make explicit)
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 
     private boolean isInContentArea(double mouseX, double mouseY) {

@@ -1,6 +1,6 @@
 package com.uitstalie.nutrition.nutrition.library.gui.base;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 public class View extends Rect {
     public View() {
@@ -35,13 +35,13 @@ public class View extends Rect {
         this.h += dh;
     }
 
-    protected void draw(GuiGraphics guiGraphics) {
+    protected void draw(GuiGraphicsExtractor guiGraphics) {
         // Override to implement custom drawing logic
     }
 
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        guiGraphics.pose().pushPose();
+    public void render(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
+        guiGraphics.pose().pushMatrix();
         draw(guiGraphics);
-        guiGraphics.pose().popPose();
+        guiGraphics.pose().popMatrix();
     }
 }

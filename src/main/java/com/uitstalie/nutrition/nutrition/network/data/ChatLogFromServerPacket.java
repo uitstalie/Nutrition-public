@@ -8,16 +8,14 @@ import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 public record ChatLogFromServerPacket(MutableComponent message) implements CustomPacketPayload {
     public static final Type<ChatLogFromServerPacket> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(Nutrition.MOD_ID, "chat_log_from_server_packet")
+            Identifier.fromNamespaceAndPath(Nutrition.MOD_ID, "chat_log_from_server_packet")
     );
     public static final StreamCodec<RegistryFriendlyByteBuf, ChatLogFromServerPacket> CODEC = CustomPacketPayload.codec(
             ChatLogFromServerPacket::encode, ChatLogFromServerPacket::decode
@@ -37,12 +35,10 @@ public record ChatLogFromServerPacket(MutableComponent message) implements Custo
     }
 
     public static void handle(ChatLogFromServerPacket message, IPayloadContext context) {
-        if (context.flow().isClientbound()) {
-            context.enqueueWork(() -> handle(message));
-        }
+        context.enqueueWork(() -> handle(message));
     }
 
-    @OnlyIn(Dist.CLIENT)
+
     private static void handle(ChatLogFromServerPacket packet) {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) {
