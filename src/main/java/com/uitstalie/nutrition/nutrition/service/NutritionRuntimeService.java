@@ -20,6 +20,7 @@ public final class NutritionRuntimeService {
         if (cap == null) return;
 
         int frequency = config.frequency.toSeconds();
+        boolean needSync = false;
 
         var groups = NutritionDataRegistry.groups();
         if (!groups.isEmpty()) {
@@ -36,9 +37,14 @@ public final class NutritionRuntimeService {
                     cap,
                     NutritionDataRegistry.effectsByLocation()
             );
+            needSync = true;
         }
 
-        NutritionSyncService.syncToClient(player, cap);
+        // P1: 仅当营养值发生变化或 effect 刚刷新时才同步
+        if (needSync || cap.getNutritionData().isDirty()) {
+            NutritionSyncService.syncToClient(player, cap);
+            cap.getNutritionData().clearDirty();
+        }
     }
 
     public static void onPlayerLogin(ServerPlayer player) {

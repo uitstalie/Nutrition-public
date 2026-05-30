@@ -27,6 +27,16 @@ public final class NutritionSyncService {
 
     private NutritionSyncService() {}
 
+    // ── itemEntries 缓存 (P0) ──
+
+    /** 缓存的物品营养绑定列表，仅在 autogen 或配置重载后重建。 */
+    private static List<NutritionDataSyncPacket.ItemEntry> cachedItemEntries;
+
+    /** 使缓存失效，强制下次 sync 时重建。autogen 或 reload 后调用。 */
+    public static void invalidateItemEntryCache() {
+        cachedItemEntries = null;
+    }
+
     public static void syncToClient(ServerPlayer player, NutritionCapability cap) {
         NutritionDataStorage data = cap.getNutritionData();
         Map<String, Integer> values = new LinkedHashMap<>();
@@ -50,8 +60,12 @@ public final class NutritionSyncService {
                 .map(a -> new NutritionDataSyncPacket.AttributeEntry(a.attributeId(), a.amount(), a.operation()))
                 .toList();
 
-        // 收集物品营养绑定：手动配置 + autogen BFS 传播
-        List<NutritionDataSyncPacket.ItemEntry> itemEntries = buildItemEntries();
+        // 收集物品营养绑定：缓存复用，仅 autogen/reload 后重建
+        List<NutritionDataSyncPacket.ItemEntry> itemEntries = cachedItemEntries;
+        if (itemEntries == null) {
+            itemEntries = buildItemEntries();
+            cachedItemEntries = itemEntries;
+        }
 
         NutritionDataSyncPacket.sendTo(
                 player,

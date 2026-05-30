@@ -35,7 +35,7 @@ public class NutritionConfigProvider extends JsonCodecProvider<NutritionConfigJs
 
         NutritionConfigJson defaultConfig = new NutritionConfigJson(
                 NutritionConfigJson.Frequency.HIGH,
-                true, true, true,
+                true, false, true,
                 "healing * 100 + saturation * 50",
                 true,
                 marginalEffect

@@ -91,7 +91,7 @@ public class NutritionConfigJson {
                     .forGetter(c -> c.frequency),
             Codec.BOOL.optionalFieldOf("enable_food_record", true)
                     .forGetter(c -> c.enableFoodRecord),
-            Codec.BOOL.optionalFieldOf("enable_chat_log", true)
+            Codec.BOOL.optionalFieldOf("enable_chat_log", false)
                     .forGetter(c -> c.enableChatLog),
             Codec.BOOL.optionalFieldOf("enable_always_eat", true)
                     .forGetter(c -> c.enableAlwaysEat),

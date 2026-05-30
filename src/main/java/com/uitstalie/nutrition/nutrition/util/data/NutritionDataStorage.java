@@ -39,8 +39,12 @@ class NutritionData {
         if (perValue <= 0) return 0;
         int before = value;
         value = Math.min(MAX_VALUE, value + perValue);
+        dirty = true;
         return value - before;
     }
+
+    /** 标记数据已脏，下次 sync 必须推送。 */
+    boolean dirty;
 
     /**
      * 执行一次衰减推进。
@@ -126,9 +130,18 @@ public class NutritionDataStorage {
         NutritionData data = groups.computeIfAbsent(groupName, k -> new NutritionData());
         data.value = Math.clamp(value, NutritionData.MIN_VALUE, NutritionData.MAX_VALUE);
         data.decayCountdown = 0;
+        dirty = true;
     }
 
-    // ────────── 衰减 ──────────
+    // ────────── Dirty flag (P1) ──────────
+
+    private boolean dirty;
+
+    /** 营养数据是否自上次同步以来发生了变化。 */
+    public boolean isDirty() { return dirty; }
+
+    /** 清除脏标记（sync 后调用）。 */
+    public void clearDirty() { dirty = false; }
 
     /**
      * 对所有营养组执行一次衰减。
@@ -143,7 +156,9 @@ public class NutritionDataStorage {
             if (group.groupName == null || group.groupName.isBlank()) continue;
             NutritionData data = groups.get(group.groupName);
             if (data == null) continue;
-            data.tickDecay(group.decayValue, group.decayFrequency, group.decayPressure);
+            if (data.tickDecay(group.decayValue, group.decayFrequency, group.decayPressure)) {
+                dirty = true;
+            }
         }
     }
 

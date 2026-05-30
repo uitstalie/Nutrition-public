@@ -133,7 +133,10 @@ public final class NutritionAutoGenerateService {
 
         } catch (Exception e) {
             Log.e("AutoGen", "Fatal error during auto generate: " + e.getMessage());
+            e.printStackTrace();
         }
+        // 失效物品缓存，下次 sync 时重建
+        NutritionSyncService.invalidateItemEntryCache();
     }
 
     /** 收集已知 group 归属：从 data pack 的 nutrition group tag + 手动 item JSON 配置。 */

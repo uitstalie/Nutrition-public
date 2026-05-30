@@ -8,10 +8,10 @@ import com.uitstalie.nutrition.nutrition.api.data.item.NutritionItemProvider;
 import com.uitstalie.nutrition.nutrition.capabilities.NutritionCapabilities;
 import com.uitstalie.nutrition.nutrition.network.NetworkPayloadHandler;
 import com.uitstalie.nutrition.nutrition.server.NutritionCommand;
-import com.uitstalie.nutrition.nutrition.server.NutritionTestCommand;
 import com.uitstalie.nutrition.nutrition.registry.AttributeTypeRegistry;
 import com.uitstalie.nutrition.nutrition.service.NutritionRuntimeService;
 import com.uitstalie.nutrition.nutrition.service.NutritionAutoGenerateService;
+import com.uitstalie.nutrition.nutrition.service.NutritionSyncService;
 import com.uitstalie.nutrition.nutrition.util.ticker.Ticker;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -52,7 +52,6 @@ public class Nutrition {
     @SubscribeEvent
     public void onRegisterCommands(RegisterCommandsEvent event) {
         NutritionCommand.register(event.getDispatcher());
-        NutritionTestCommand.register(event.getDispatcher());
     }
 
     /**
@@ -70,6 +69,7 @@ public class Nutrition {
     @SubscribeEvent
     public void onServerStarted(ServerStartedEvent event) {
         NutritionAutoGenerateService.autoGenerateIfNeeded(event.getServer());
+        NutritionSyncService.invalidateItemEntryCache();
     }
 
     private void gatherData(GatherDataEvent event) {
