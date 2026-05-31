@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.uitstalie.neotrition.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "neotrition.refmap.json",
+  "mixins": [
+    "common.NutritionFoodDataMixin",
+    "common.AlwaysEatMixin",
+    "server.NutritionPlayerMixin"
+  ],
+  "client": [
+    "client.NutritionPlayerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

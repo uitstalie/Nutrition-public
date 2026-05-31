@@ -1,0 +1,380 @@
+{
+  "entries": [
+    {
+      "attributes": [
+        {
+          "amount": 5.0,
+          "name": "minecraft:generic.max_health",
+          "operation": "ADD_VALUE"
+        }
+      ],
+      "match": {
+        "predict": "OR",
+        "prediction": [
+          {
+            "above": 100000,
+            "below": 25000,
+            "neotrition": "proteins"
+          },
+          {
+            "above": 100000,
+            "below": 25000,
+            "neotrition": "eggs"
+          },
+          {
+            "above": 100000,
+            "below": 25000,
+            "neotrition": "fishs"
+          },
+          {
+            "above": 100000,
+            "below": 25000,
+            "neotrition": "grains"
+          }
+        ]
+      }
+    },
+    {
+      "attributes": [
+        {
+          "amount": 10.0,
+          "name": "minecraft:generic.max_health",
+          "operation": "ADD_VALUE"
+        }
+      ],
+      "match": {
+        "predict": "AND",
+        "prediction": [
+          {
+            "above": 100000,
+            "below": 50000,
+            "neotrition": "proteins"
+          },
+          {
+            "above": 100000,
+            "below": 50000,
+            "neotrition": "eggs"
+          },
+          {
+            "above": 100000,
+            "below": 50000,
+            "neotrition": "fishs"
+          },
+          {
+            "above": 100000,
+            "below": 50000,
+            "neotrition": "grains"
+          }
+        ]
+      }
+    },
+    {
+      "attributes": [
+        {
+          "amount": 5.0,
+          "name": "minecraft:generic.armor",
+          "operation": "ADD_VALUE"
+        }
+      ],
+      "match": {
+        "predict": "AND",
+        "prediction": [
+          {
+            "above": 100000,
+            "below": 50000,
+            "neotrition": "wines"
+          },
+          {
+            "above": 100000,
+            "below": 50000,
+            "neotrition": "proteins"
+          },
+          {
+            "above": 100000,
+            "below": 50000,
+            "neotrition": "grains"
+          },
+          {
+            "above": 100000,
+            "below": 50000,
+            "neotrition": "vegetables"
+          },
+          {
+            "above": 100000,
+            "below": 50000,
+            "neotrition": "fruits"
+          }
+        ]
+      }
+    },
+    {
+      "attributes": [
+        {
+          "amount": 10.0,
+          "name": "minecraft:generic.armor",
+          "operation": "ADD_VALUE"
+        },
+        {
+          "amount": 0.5,
+          "name": "minecraft:generic.knockback_resistance",
+          "operation": "ADD_VALUE"
+        }
+      ],
+      "match": {
+        "predict": "AND",
+        "prediction": [
+          {
+            "above": 100000,
+            "below": 50000,
+            "neotrition": "proteins"
+          },
+          {
+            "above": 100000,
+            "below": 50000,
+            "neotrition": "grains"
+          },
+          {
+            "above": 100000,
+            "below": 50000,
+            "neotrition": "vegetables"
+          },
+          {
+            "above": 100000,
+            "below": 50000,
+            "neotrition": "fruits"
+          },
+          {
+            "above": 100000,
+            "below": 50000,
+            "neotrition": "trace_elements"
+          }
+        ]
+      }
+    },
+    {
+      "effects": [
+        {
+          "name": "minecraft:water_breathing"
+        }
+      ],
+      "match": {
+        "predict": "AND",
+        "prediction": [
+          {
+            "above": 100000,
+            "below": 25000,
+            "neotrition": "fishs"
+          }
+        ]
+      }
+    },
+    {
+      "effects": [
+        {
+          "name": "minecraft:night_vision"
+        }
+      ],
+      "match": {
+        "predict": "AND",
+        "prediction": [
+          {
+            "above": 100000,
+            "below": 50000,
+            "neotrition": "vegetables"
+          }
+        ]
+      }
+    },
+    {
+      "effects": [
+        {
+          "name": "minecraft:luck"
+        }
+      ],
+      "match": {
+        "predict": "OR",
+        "prediction": [
+          {
+            "above": 100000,
+            "below": 20000,
+            "neotrition": "sugars"
+          },
+          {
+            "above": 100000,
+            "below": 20000,
+            "neotrition": "honeys"
+          },
+          {
+            "above": 100000,
+            "below": 20000,
+            "neotrition": "wines"
+          }
+        ]
+      }
+    },
+    {
+      "effects": [
+        {
+          "name": "minecraft:haste"
+        }
+      ],
+      "match": {
+        "predict": "OR",
+        "prediction": [
+          {
+            "above": 100000,
+            "below": 25000,
+            "neotrition": "nuts"
+          },
+          {
+            "above": 100000,
+            "below": 25000,
+            "neotrition": "salt"
+          },
+          {
+            "above": 100000,
+            "below": 25000,
+            "neotrition": "coffee"
+          }
+        ]
+      }
+    },
+    {
+      "effects": [
+        {
+          "name": "minecraft:speed"
+        }
+      ],
+      "match": {
+        "predict": "AND",
+        "prediction": [
+          {
+            "above": 100000,
+            "below": 25000,
+            "neotrition": "coffee"
+          }
+        ]
+      }
+    },
+    {
+      "effects": [
+        {
+          "name": "minecraft:regeneration"
+        }
+      ],
+      "match": {
+        "predict": "OR",
+        "prediction": [
+          {
+            "above": 100000,
+            "below": 20000,
+            "neotrition": "mushrooms"
+          },
+          {
+            "above": 100000,
+            "below": 20000,
+            "neotrition": "eggs"
+          },
+          {
+            "above": 100000,
+            "below": 20000,
+            "neotrition": "milks"
+          }
+        ]
+      }
+    },
+    {
+      "effects": [
+        {
+          "name": "minecraft:speed",
+          "power": 1
+        }
+      ],
+      "match": {
+        "predict": "AND",
+        "prediction": [
+          {
+            "above": 100000,
+            "below": 50000,
+            "neotrition": "grains"
+          },
+          {
+            "above": 100000,
+            "below": 50000,
+            "neotrition": "fruits"
+          },
+          {
+            "above": 100000,
+            "below": 50000,
+            "neotrition": "proteins"
+          },
+          {
+            "above": 100000,
+            "below": 50000,
+            "neotrition": "vegetables"
+          }
+        ]
+      }
+    },
+    {
+      "effects": [
+        {
+          "name": "minecraft:saturation"
+        }
+      ],
+      "match": {
+        "predict": "AND",
+        "prediction": [
+          {
+            "above": 100000,
+            "below": 50000,
+            "neotrition": "eggs"
+          },
+          {
+            "above": 100000,
+            "below": 50000,
+            "neotrition": "grains"
+          },
+          {
+            "above": 100000,
+            "below": 50000,
+            "neotrition": "milks"
+          }
+        ]
+      }
+    },
+    {
+      "effects": [
+        {
+          "name": "minecraft:luck",
+          "power": 1
+        }
+      ],
+      "match": {
+        "predict": "AND",
+        "prediction": [
+          {
+            "above": 100000,
+            "below": 50000,
+            "neotrition": "honeys"
+          },
+          {
+            "above": 100000,
+            "below": 50000,
+            "neotrition": "sugars"
+          },
+          {
+            "above": 100000,
+            "below": 50000,
+            "neotrition": "wines"
+          },
+          {
+            "above": 100000,
+            "below": 50000,
+            "neotrition": "trace_elements"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "replace": false,
+  "values": [
+    "tide:iron_tetra",
+    "tide:lapis_lanternfish",
+    "tide:gilded_minnow",
+    "tide:crystal_shrimp",
+    "tide:endergazer",
+    "tide:enderfin",
+    "tide:elytrout",
+    "tide:glowfish",
+    "tide:luminescent_jellyfish",
+    "tide:sun_emblem",
+    "tide:coelacanth",
+    "farmersdelight:barbecue_stick",
+    "silentgems:potato_on_a_stick",
+    "minecraft:stick",
+    "minecraft:bowl",
+    "minecraft:red_mushroom",
+    "minecraft:brown_mushroom"
+  ]
+}
